@@ -12,9 +12,6 @@ class DefaultLinkedNode(IdentifiedLinkedNode):
 
     @classmethod
     def from_mapping(cls, mapping, id_maker):
-        return cls(
-            id_maker=id_maker, **mapping
-
-        )
+        return cls(id_maker=id_maker, **mapping)
 
 

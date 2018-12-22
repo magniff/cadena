@@ -1,5 +1,8 @@
-from sqlalchemy.orm import scoped_session, sessionmaker
 from contextlib import contextmanager
+
+
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.exc import IntegrityError
 
 
 from snapshot.abc import AbstractDriver
@@ -41,6 +44,9 @@ class AlchemyDriver(AbstractDriver):
             mapping={"data": data, "links": links}
         )
 
+        if self.retrieve(snapshot_node.id):
+            return snapshot_node.id
+
         with transaction(self.db_engine) as t:
             t.add(Node(id=snapshot_node.id, data=snapshot_node.data))
             for link in links:
@@ -51,12 +57,17 @@ class AlchemyDriver(AbstractDriver):
     def retrieve(self, node_id):
         with transaction(self.db_engine) as t:
             node_data_result = t.query(Node).filter_by(id=node_id).first()
-            node_links_result = t.query(Link).filter_by(parent=node_id).all()
-            return self.return_type.from_mapping(
-                {
-                    "data": node_data_result.data,
-                    "links": [item.child for item in node_links_result]
-                },
-                id_maker=self.node_identifier
+            return (
+                node_data_result and
+                self.return_type.from_mapping(
+                    {
+                        "data": node_data_result.data,
+                        "links": [
+                            item.child for item in
+                            t.query(Link).filter_by(parent=node_id).all()
+                        ]
+                    },
+                    id_maker=self.node_identifier
+                )
             )
 

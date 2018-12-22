@@ -1,6 +1,4 @@
-from sqlalchemy import (
-    Table, Column, LargeBinary, PrimaryKeyConstraint
-)
+from sqlalchemy import Column, LargeBinary, Integer
 
 
 from .base import BaseMapping
@@ -14,6 +12,7 @@ class Node(BaseMapping):
 
 class Link(BaseMapping):
     __tablename__ = "links"
-    parent = Column(LargeBinary(length=32), primary_key=True)
-    child = Column(LargeBinary(length=32), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    parent = Column(LargeBinary(length=32), index=True)
+    child = Column(LargeBinary(length=32))
 

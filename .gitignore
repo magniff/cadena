@@ -61,3 +61,5 @@ target/
 # IDE related
 .project
 .pydevproject
+
+.hypothesis/*
