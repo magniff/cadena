@@ -1,8 +1,8 @@
-from snapshot.abc import AbstractHashingDriver
+from snapshot.abc import AbstractDriver
 from snapshot.drivers.common import DefaultLinkedNode, sha256_node_id
 
 
-class MemdictDriver(AbstractHashingDriver):
+class MemdictDriver(AbstractDriver):
 
     def __init__(self):
         self.storage = dict()

@@ -53,7 +53,3 @@ class AbstractDriver(WatchABCType):
     def retrieve(self, node_id: NodeId) -> int:
         pass
 
-
-class AbstractHashingDriver(AbstractDriver):
-    pass
-
