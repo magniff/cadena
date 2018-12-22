@@ -21,6 +21,7 @@ def test_uc0():
     data_node_key = container.store(b"huge_string_of_bytes", links=[])
     value0_key = container.store(data=b"value0_data", links=[data_node_key])
     value1_key = container.store(data=b"value1_data", links=[data_node_key])
+    assert value0_key != value1_key
 
     assert len(container) == 3
     value0 = container.retrieve(value0_key)

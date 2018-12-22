@@ -1,37 +1,13 @@
-import hashlib
-from snapshot.abc import AbstractHashingDriver, AbstractLinkedNode
-
-
-def node_id_getter(node, content_identifier):
-    id_object = content_identifier(node.data + b"".join(node.links))
-    return id_object.digest()
-
-
-class NodeImplementation(AbstractLinkedNode):
-
-    @classmethod
-    def from_mapping(cls, mapping, id_getter):
-        instance = cls(
-            data=mapping["data"], links=mapping["links"],
-
-        )
-        instance.id = instance.get_node_id(id_getter)
-        return instance
-
-    def get_node_id(self, id_getter):
-        return id_getter(self)
-
-    def __init__(self, data, links):
-        self.data = data
-        self.links = links
+from snapshot.abc import AbstractHashingDriver
+from snapshot.drivers.common import DefaultLinkedNode, sha256_node_id
 
 
 class MemdictDriver(AbstractHashingDriver):
 
     def __init__(self):
         self.storage = dict()
-        self.return_type = NodeImplementation
-        self.content_identifier = hashlib.sha256
+        self.return_type = DefaultLinkedNode
+        self.node_identifier = sha256_node_id
 
     def __len__(self):
         return len(self.storage)
@@ -42,7 +18,7 @@ class MemdictDriver(AbstractHashingDriver):
                 "data": data,
                 "links": list() if links is None else links
             },
-            id_getter=lambda node: node_id_getter(node, self.content_identifier)
+            id_maker=self.node_identifier
         )
         self.storage[node_instance.id] = node_instance
         return node_instance.id

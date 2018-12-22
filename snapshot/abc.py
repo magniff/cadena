@@ -21,28 +21,36 @@ NodeId = bytes
 NodePayload = bytes
 
 
-class AbstractLinkedNode(WatchABCType):
+class UnidentifiedLinkedNode(WatchABCType):
 
-    id = InstanceOf(NodeId)
     data = InstanceOf(NodePayload)
     links = Container(InstanceOf(NodeId), container=list)
 
-    @abc.abstractmethod
-    def get_node_id(self, id_getter):
-        pass
+    def __init__(self, data, links):
+        self.data = data
+        self.links = links
+
+
+class IdentifiedLinkedNode(UnidentifiedLinkedNode):
+
+    id = InstanceOf(NodeId)
+
+    def __init__(self, id_maker, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.id = id_maker(self)
 
 
 class AbstractDriver(WatchABCType):
 
-    return_type = SubclassOf(AbstractLinkedNode)
-    content_identifier = InstanceOf(Callable)
+    return_type = SubclassOf(IdentifiedLinkedNode)
+    node_identifier = InstanceOf(Callable)
 
     @abc.abstractmethod
     def store(self, binary_data: NodePayload) -> NodeId:
         pass
 
     @abc.abstractmethod
-    def retrieve(self, node_id: NodeId) -> AbstractLinkedNode:
+    def retrieve(self, node_id: NodeId) -> int:
         pass
 
 
