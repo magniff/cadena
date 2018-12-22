@@ -9,9 +9,6 @@ def node_id_getter(node, content_identifier):
 
 class NodeImplementation(AbstractLinkedNode):
 
-    def get_node_id(self, id_getter):
-        return id_getter(self)
-
     @classmethod
     def from_mapping(cls, mapping, id_getter):
         instance = cls(
@@ -20,6 +17,9 @@ class NodeImplementation(AbstractLinkedNode):
         )
         instance.id = instance.get_node_id(id_getter)
         return instance
+
+    def get_node_id(self, id_getter):
+        return id_getter(self)
 
     def __init__(self, data, links):
         self.data = data
@@ -36,11 +36,11 @@ class MemdictDriver(AbstractHashingDriver):
     def __len__(self):
         return len(self.storage)
 
-    def store(self, data, links):
+    def store(self, data, links=None):
         node_instance = self.return_type.from_mapping(
             {
                 "data": data,
-                "links": links
+                "links": list() if links is None else links
             },
             id_getter=lambda node: node_id_getter(node, self.content_identifier)
         )
