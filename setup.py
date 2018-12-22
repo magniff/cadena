@@ -11,16 +11,17 @@ classifiers = [
 
 setuptools.setup(
     name="snapshot",
-    description="Wierd and inefficient tar clone.",
+    description="Wierd and inefficient Tar clone.",
     version="0.0.1",
     license="MIT license",
     platforms=["unix", "linux", "osx", "win32"],
     author="magniff",
     url="https://github.com/magniff/snapshot",
     classifiers=classifiers,
-    packages=[
-        "snapshot",
+    install_requires=[
+        "sqlalchemy", "watch"
     ],
+    packages=setuptools.find_packages(),
     zip_safe=False,
 )
 
