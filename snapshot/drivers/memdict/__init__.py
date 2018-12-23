@@ -23,6 +23,6 @@ class MemdictDriver(AbstractDriver):
         self.storage[node_instance.id] = node_instance
         return node_instance.id
 
-    def retrieve(self, node_id):
+    def lookup(self, node_id):
         return self.storage.get(node_id, None)
 

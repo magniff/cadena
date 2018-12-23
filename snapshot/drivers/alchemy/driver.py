@@ -25,7 +25,7 @@ def new_session(db_engine):
 
 
 def autosession(method):
-    """ Works with AlchemyDriver methods like "store" and "retreive".
+    """ Works with AlchemyDriver methods like "store" and "lookup".
     """
 
     def decorator(*args, **kwargs):
@@ -59,7 +59,7 @@ class AlchemyDriver(AbstractDriver):
             mapping={"data": data, "links": links}
         )
 
-        if self.retrieve(node_id=snapshot_node.id, session=session):
+        if self.lookup(node_id=snapshot_node.id, session=session):
             return snapshot_node.id
 
         session.add(Node(id=snapshot_node.id, data=snapshot_node.data))
@@ -69,7 +69,7 @@ class AlchemyDriver(AbstractDriver):
         return snapshot_node.id
 
     @autosession
-    def retrieve(self, *, node_id, session=None, check=False):
+    def lookup(self, *, node_id, session=None):
         node_data_result = session.query(Node).filter_by(id=node_id).first()
         return (
             node_data_result and

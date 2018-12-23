@@ -30,11 +30,11 @@ def store(node, driver, **kwargs):
         )
 
 
-def retreive(node_id, driver, **kwargs):
-    node = driver.retrieve(node_id=node_id, **kwargs)
+def lookup(node_id, driver, **kwargs):
+    node = driver.lookup(node_id=node_id, **kwargs)
     return (
         node.data,
-        [retreive(link, driver, **kwargs) for link in node.links]
+        [lookup(link, driver, **kwargs) for link in node.links]
     )
 
 
@@ -47,7 +47,7 @@ def sqlite_engine():
 @given(node=Nodes)
 def test_memdict_driver(node):
     driver = memdict.MemdictDriver()
-    assert node == retreive(store(node, driver), driver)
+    assert node == lookup(store(node, driver), driver)
 
 
 @py.test.mark.slow
@@ -59,7 +59,7 @@ def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
 
     driver = alchemy.AlchemyDriver(sqlite_engine)
     root_key = store(node, driver)
-    assert node == retreive(root_key, driver)
+    assert node == lookup(root_key, driver)
 
 
 @py.test.mark.slow
@@ -72,7 +72,7 @@ def test_alchemy_driver_same_session_reuse(node, sqlite_engine):
     driver = alchemy.AlchemyDriver(sqlite_engine)
     with alchemy.driver.new_session(driver.db_engine) as session:
         root_key = store(node, driver, session=session)
-        assert node == retreive(root_key, driver, session=session)
+        assert node == lookup(root_key, driver, session=session)
 
 
 @py.test.mark.slow
@@ -86,5 +86,5 @@ def test_alchemy_driver_session_reuse(node, sqlite_engine):
     with alchemy.driver.new_session(driver.db_engine) as session:
         root_key = store(node, driver, session=session)
     with alchemy.driver.new_session(driver.db_engine) as session:
-        assert node == retreive(root_key, driver, session=session)
+        assert node == lookup(root_key, driver, session=session)
 

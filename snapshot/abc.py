@@ -46,10 +46,10 @@ class AbstractDriver(WatchABCType):
     node_identifier = InstanceOf(Callable)
 
     @abc.abstractmethod
-    def store(self, binary_data: NodePayload) -> NodeId:
+    def store(self, data: NodePayload) -> NodeId:
         pass
 
     @abc.abstractmethod
-    def retrieve(self, node_id: NodeId, check: bool) -> IdentifiedLinkedNode:
+    def lookup(self, node_id: NodeId) -> IdentifiedLinkedNode:
         pass
 
