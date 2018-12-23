@@ -22,7 +22,7 @@ def store(node, driver, **kwargs):
         return driver.store(data=data, links=links, **kwargs)
     else:
         return driver.store(
-            data=data, links=[store(link, driver) for link in links],
+            data=data, links=[store(link, driver, **kwargs) for link in links],
             **kwargs
         )
 
@@ -47,17 +47,37 @@ def test_memdict_driver(node):
 
 
 @given(node=Nodes)
+def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
+    """
+    Here each IO action creates separate session scope.
+    """
+
+    driver = alchemy.AlchemyDriver(sqlite_engine)
+    root_key = store(node, driver)
+    assert node == retreive(root_key, driver)
+
+
+@given(node=Nodes)
+def test_alchemy_driver_same_session_reuse(node, sqlite_engine):
+    """
+    The same IO session is shared between write and read actions
+    """
+
+    driver = alchemy.AlchemyDriver(sqlite_engine)
+    with alchemy.new_session(driver.db_engine) as session:
+        root_key = store(node, driver, session=session)
+        assert node == retreive(root_key, driver, session=session)
+
+
+@given(node=Nodes)
 def test_alchemy_driver_session_reuse(node, sqlite_engine):
+    """
+    Write and read actions use separate sessions
+    """
+
     driver = alchemy.AlchemyDriver(sqlite_engine)
     with alchemy.new_session(driver.db_engine) as session:
         root_key = store(node, driver, session=session)
     with alchemy.new_session(driver.db_engine) as session:
         assert node == retreive(root_key, driver, session=session)
-
-
-@given(node=Nodes)
-def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
-    driver = alchemy.AlchemyDriver(sqlite_engine)
-    root_key = store(node, driver)
-    assert node == retreive(root_key, driver)
 
