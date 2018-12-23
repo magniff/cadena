@@ -8,7 +8,7 @@ BaseMapping = declarative_base()
 
 
 class Node(BaseMapping):
-    __tablename__ = "nodes",
+    __tablename__ = "nodes"
     id = Column(LargeBinary(length=32), primary_key=True)
     data = Column(LargeBinary)
 
