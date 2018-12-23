@@ -43,12 +43,14 @@ def sqlite_engine():
     yield create_engine("sqlite:///:memory:")
 
 
+@py.test.mark.slow
 @given(node=Nodes)
 def test_memdict_driver(node):
     driver = memdict.MemdictDriver()
     assert node == retreive(store(node, driver), driver)
 
 
+@py.test.mark.slow
 @given(node=Nodes)
 def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
     """
@@ -60,6 +62,7 @@ def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
     assert node == retreive(root_key, driver)
 
 
+@py.test.mark.slow
 @given(node=Nodes)
 def test_alchemy_driver_same_session_reuse(node, sqlite_engine):
     """
@@ -72,6 +75,7 @@ def test_alchemy_driver_same_session_reuse(node, sqlite_engine):
         assert node == retreive(root_key, driver, session=session)
 
 
+@py.test.mark.slow
 @given(node=Nodes)
 def test_alchemy_driver_session_reuse(node, sqlite_engine):
     """
