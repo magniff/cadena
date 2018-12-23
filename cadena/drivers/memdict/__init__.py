@@ -1,5 +1,5 @@
-from snapshot.abc import AbstractDriver
-from snapshot.drivers.common import DefaultLinkedNode, sha256_node_id
+from cadena.abc import AbstractDriver
+from cadena.drivers.common import DefaultLinkedNode, sha256_node_id
 
 
 class MemdictDriver(AbstractDriver):

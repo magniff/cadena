@@ -8,8 +8,8 @@ from hypothesis import given
 from sqlalchemy import create_engine
 
 
-import snapshot.drivers.memdict as memdict
-import snapshot.drivers.alchemy as alchemy
+import cadena.drivers.memdict as memdict
+import cadena.drivers.alchemy as alchemy
 
 
 Nodes = s.deferred(lambda: s.tuples(s.binary(min_size=0, max_size=5), Links))

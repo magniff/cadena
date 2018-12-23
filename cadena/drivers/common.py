@@ -1,7 +1,7 @@
 import hashlib
 
 
-from snapshot.abc import IdentifiedLinkedNode
+from cadena.abc import IdentifiedLinkedNode
 
 
 def sha256_node_id(node):

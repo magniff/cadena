@@ -4,8 +4,8 @@ from contextlib import contextmanager
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 
-from snapshot.abc import AbstractDriver
-from snapshot.drivers.common import DefaultLinkedNode, sha256_node_id
+from cadena.abc import AbstractDriver
+from cadena.drivers.common import DefaultLinkedNode, sha256_node_id
 
 
 from .db_objects import BaseMapping, Node, Link
