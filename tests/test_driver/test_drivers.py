@@ -3,6 +3,7 @@ import py.test
 
 from hypothesis import strategies as s
 from hypothesis import given
+from hypothesis import settings, HealthCheck
 
 
 from sqlalchemy import create_engine
@@ -45,6 +46,7 @@ def sqlite_engine():
 
 @py.test.mark.slow
 @given(node=Nodes)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_memdict_driver(node):
     driver = memdict.MemdictDriver()
     assert node == lookup(store(node, driver), driver)
@@ -52,6 +54,7 @@ def test_memdict_driver(node):
 
 @py.test.mark.slow
 @given(node=Nodes)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
     """
     Here each IO action creates separate session scope.
@@ -64,6 +67,7 @@ def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
 
 @py.test.mark.slow
 @given(node=Nodes)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_alchemy_driver_same_session_reuse(node, sqlite_engine):
     """
     The same IO session is shared between write and read actions
@@ -77,6 +81,7 @@ def test_alchemy_driver_same_session_reuse(node, sqlite_engine):
 
 @py.test.mark.slow
 @given(node=Nodes)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_alchemy_driver_session_reuse(node, sqlite_engine):
     """
     Write and read actions use separate sessions
@@ -87,4 +92,3 @@ def test_alchemy_driver_session_reuse(node, sqlite_engine):
         root_key = store(node, driver, session=session)
     with alchemy.driver.new_session(driver.db_engine) as session:
         assert node == lookup(root_key, driver, session=session)
-
