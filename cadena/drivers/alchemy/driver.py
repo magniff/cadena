@@ -62,9 +62,10 @@ class AlchemyDriver(AbstractDriver):
         if self.lookup(node_id=snapshot_node.id, session=session):
             return snapshot_node.id
 
-        session.add(Node(id=snapshot_node.id, data=snapshot_node.data))
+        node_data = Node(id=snapshot_node.id, data=snapshot_node.data)
         for link in links:
-            session.add(Link(parent=snapshot_node.id, child=link))
+            node_data.links.append(Link(child=link))
+        session.add(node_data)
 
         return snapshot_node.id
 
@@ -76,10 +77,7 @@ class AlchemyDriver(AbstractDriver):
             self.return_type.from_mapping(
                 {
                     "data": node_data_result.data,
-                    "links": [
-                        item.child for item in
-                        session.query(Link).filter_by(parent=node_id).all()
-                    ]
+                    "links": [item.child for item in node_data_result.links]
                 },
                 id_maker=self.node_identifier
             )
