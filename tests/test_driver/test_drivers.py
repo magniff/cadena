@@ -12,8 +12,8 @@ import cadena.drivers.memdict as memdict
 import cadena.drivers.alchemy as alchemy
 
 
-Nodes = s.deferred(lambda: s.tuples(s.binary(min_size=0, max_size=5), Links))
-Links = s.deferred(lambda: s.lists(Nodes, max_size=5, min_size=0))
+Nodes = s.deferred(lambda: s.tuples(s.binary(min_size=0, max_size=10), Links))
+Links = s.deferred(lambda: s.lists(Nodes, max_size=3, min_size=0))
 
 
 def store(node, driver, **kwargs):
