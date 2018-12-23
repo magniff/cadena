@@ -2,7 +2,6 @@ from contextlib import contextmanager
 
 
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exc import IntegrityError
 
 
 from snapshot.abc import AbstractDriver
@@ -14,7 +13,7 @@ from .objects import Node, Link
 
 
 @contextmanager
-def transaction(db_engine):
+def new_session(db_engine):
     session = scoped_session(sessionmaker(bind=db_engine))
     try:
         yield session
@@ -24,6 +23,21 @@ def transaction(db_engine):
         raise e
     finally:
         session.close()
+
+
+def autosession(method):
+
+    def decorator(*args, **kwargs):
+        self, *_ = args
+
+        session = kwargs.get("session")
+        if session is None:
+            with new_session(self.db_engine) as s:
+                kwargs["session"] = s
+                return method(*args, **kwargs)
+        return method(*args, **kwargs)
+
+    return decorator
 
 
 class AlchemyDriver(AbstractDriver):
@@ -36,38 +50,37 @@ class AlchemyDriver(AbstractDriver):
         self.node_identifier = sha256_node_id
         self.db_engine = db_engine
 
-    def store(self, data, links=None):
+    @autosession
+    def store(self, *, data, links=None, session=None):
         links = list() if links is None else links
-
         snapshot_node = self.return_type.from_mapping(
             id_maker=self.node_identifier,
             mapping={"data": data, "links": links}
         )
 
-        if self.retrieve(snapshot_node.id):
+        if self.retrieve(node_id=snapshot_node.id, session=session):
             return snapshot_node.id
 
-        with transaction(self.db_engine) as t:
-            t.add(Node(id=snapshot_node.id, data=snapshot_node.data))
-            for link in links:
-                t.add(Link(parent=snapshot_node.id, child=link))
+        session.add(Node(id=snapshot_node.id, data=snapshot_node.data))
+        for link in links:
+            session.add(Link(parent=snapshot_node.id, child=link))
 
         return snapshot_node.id
 
-    def retrieve(self, node_id):
-        with transaction(self.db_engine) as t:
-            node_data_result = t.query(Node).filter_by(id=node_id).first()
-            return (
-                node_data_result and
-                self.return_type.from_mapping(
-                    {
-                        "data": node_data_result.data,
-                        "links": [
-                            item.child for item in
-                            t.query(Link).filter_by(parent=node_id).all()
-                        ]
-                    },
-                    id_maker=self.node_identifier
-                )
+    @autosession
+    def retrieve(self, *, node_id, session=None):
+        node_data_result = session.query(Node).filter_by(id=node_id).first()
+        return (
+            node_data_result and
+            self.return_type.from_mapping(
+                {
+                    "data": node_data_result.data,
+                    "links": [
+                        item.child for item in
+                        session.query(Link).filter_by(parent=node_id).all()
+                    ]
+                },
+                id_maker=self.node_identifier
             )
+        )
 

@@ -12,42 +12,52 @@ import snapshot.drivers.memdict as memdict
 import snapshot.drivers.alchemy as alchemy
 
 
-Nodes = s.deferred(lambda: s.tuples(s.binary(min_size=0, max_size=10), Links))
+Nodes = s.deferred(lambda: s.tuples(s.binary(min_size=0, max_size=5), Links))
 Links = s.deferred(lambda: s.lists(Nodes, max_size=5, min_size=0))
 
 
-def traverse(node, driver):
+def store(node, driver, **kwargs):
     data, links = node
     if not links:
-        return driver.store(data=data, links=[])
+        return driver.store(data=data, links=links, **kwargs)
     else:
         return driver.store(
-            data=data, links=[traverse(link, driver) for link in links]
+            data=data, links=[store(link, driver) for link in links],
+            **kwargs
         )
 
 
-def traverse_back(node_id, driver):
-    node = driver.retrieve(node_id)
-    return (node.data, [traverse_back(link, driver) for link in node.links])
+def retreive(node_id, driver, **kwargs):
+    node = driver.retrieve(node_id=node_id, **kwargs)
+    return (
+        node.data,
+        [retreive(link, driver, **kwargs) for link in node.links]
+    )
 
 
 @py.test.fixture(scope="function")
-def db_engine(tmpdir):
-    yield create_engine("sqlite:///" + str(tmpdir.join("nodes.db")))
-
-
-@py.test.fixture(
-    scope="function",
-    params=[
-        lambda *args, **kwargs: memdict.MemdictDriver(),
-        lambda db_engine: alchemy.AlchemyDriver(db_engine)
-    ]
-)
-def driver(request, db_engine):
-    return request.param(db_engine)
+def sqlite_engine():
+    yield create_engine("sqlite:///:memory:")
 
 
 @given(node=Nodes)
-def test_basic_io(driver, node):
-    assert node == traverse_back(traverse(node, driver), driver)
+def test_memdict_driver(node):
+    driver = memdict.MemdictDriver()
+    assert node == retreive(store(node, driver), driver)
+
+
+@given(node=Nodes)
+def test_alchemy_driver_session_reuse(node, sqlite_engine):
+    driver = alchemy.AlchemyDriver(sqlite_engine)
+    with alchemy.new_session(driver.db_engine) as session:
+        root_key = store(node, driver, session=session)
+    with alchemy.new_session(driver.db_engine) as session:
+        assert node == retreive(root_key, driver, session=session)
+
+
+@given(node=Nodes)
+def test_alchemy_driver_no_session_reuse(node, sqlite_engine):
+    driver = alchemy.AlchemyDriver(sqlite_engine)
+    root_key = store(node, driver)
+    assert node == retreive(root_key, driver)
 
