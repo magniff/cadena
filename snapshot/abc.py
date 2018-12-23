@@ -50,6 +50,6 @@ class AbstractDriver(WatchABCType):
         pass
 
     @abc.abstractmethod
-    def retrieve(self, node_id: NodeId) -> int:
+    def retrieve(self, node_id: NodeId, check: bool) -> IdentifiedLinkedNode:
         pass
 

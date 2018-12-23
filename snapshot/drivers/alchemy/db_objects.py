@@ -1,7 +1,10 @@
 from sqlalchemy import Column, LargeBinary, Integer
 
 
-from .base import BaseMapping
+from sqlalchemy.ext.declarative import declarative_base
+
+
+BaseMapping = declarative_base()
 
 
 class Node(BaseMapping):
@@ -14,5 +17,5 @@ class Link(BaseMapping):
     __tablename__ = "links"
     id = Column(Integer, primary_key=True, autoincrement=True)
     parent = Column(LargeBinary(length=32), index=True)
-    child = Column(LargeBinary(length=32))
+    child = Column(LargeBinary(length=32), index=True)
 

@@ -22,7 +22,10 @@ def store(node, driver, **kwargs):
         return driver.store(data=data, links=links, **kwargs)
     else:
         return driver.store(
-            data=data, links=[store(link, driver, **kwargs) for link in links],
+            data=data,
+            links=[
+                store(link, driver, **kwargs) for link in links
+            ],
             **kwargs
         )
 
@@ -64,7 +67,7 @@ def test_alchemy_driver_same_session_reuse(node, sqlite_engine):
     """
 
     driver = alchemy.AlchemyDriver(sqlite_engine)
-    with alchemy.new_session(driver.db_engine) as session:
+    with alchemy.driver.new_session(driver.db_engine) as session:
         root_key = store(node, driver, session=session)
         assert node == retreive(root_key, driver, session=session)
 
@@ -76,8 +79,8 @@ def test_alchemy_driver_session_reuse(node, sqlite_engine):
     """
 
     driver = alchemy.AlchemyDriver(sqlite_engine)
-    with alchemy.new_session(driver.db_engine) as session:
+    with alchemy.driver.new_session(driver.db_engine) as session:
         root_key = store(node, driver, session=session)
-    with alchemy.new_session(driver.db_engine) as session:
+    with alchemy.driver.new_session(driver.db_engine) as session:
         assert node == retreive(root_key, driver, session=session)
 
