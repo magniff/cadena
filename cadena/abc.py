@@ -53,3 +53,20 @@ class AbstractDriver(WatchABCType):
     def lookup(self, node_id: NodeId) -> IdentifiedLinkedNode:
         pass
 
+
+class AbstractInodeIOProvider(WatchABCType):
+
+    driver = InstanceOf(AbstractDriver)
+
+    @abc.abstractmethod
+    def compose_tag(self, tag_value, tag_type):
+        pass
+
+    @abc.abstractmethod
+    def compose_chunk(self, data):
+        pass
+
+    @abc.abstractmethod
+    def lookup(self, node_id: NodeId):
+        pass
+

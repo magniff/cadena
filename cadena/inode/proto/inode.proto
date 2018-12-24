@@ -4,14 +4,26 @@ syntax = "proto2";
 package inode;
 
 
-message Inode {
-  enum NodeType {
-    CHUNK = 0;
-    FILE = 1;
-    FOLDER = 2;
+message Chunk {
+  required bytes payload = 1;
+  required int64 length = 2;
+}
+
+
+message Tag {
+  enum TagType {
+    FILE = 0;
+    FOLDER = 1;
   }
-  required int32 version = 1 [default=0];
-  required NodeType type = 2;
-  optional string tag = 3;
+  required string value = 1;
+  required TagType type = 2;
+}
+
+
+message InodePayload {
+  oneof ptype {
+    Tag tag = 1;
+    Chunk chunk = 2;
+  }
 }
 

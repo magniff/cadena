@@ -19,63 +19,52 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='inode',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x0binode.proto\x12\x05inode\"z\n\x05Inode\x12\x12\n\x07version\x18\x01 \x02(\x05:\x01\x30\x12#\n\x04type\x18\x02 \x02(\x0e\x32\x15.inode.Inode.NodeType\x12\x0b\n\x03tag\x18\x03 \x01(\t\"+\n\x08NodeType\x12\t\n\x05\x43HUNK\x10\x00\x12\x08\n\x04\x46ILE\x10\x01\x12\n\n\x06\x46OLDER\x10\x02')
+  serialized_pb=_b('\n\x0binode.proto\x12\x05inode\"(\n\x05\x43hunk\x12\x0f\n\x07payload\x18\x01 \x02(\x0c\x12\x0e\n\x06length\x18\x02 \x02(\x03\"W\n\x03Tag\x12\r\n\x05value\x18\x01 \x02(\t\x12 \n\x04type\x18\x02 \x02(\x0e\x32\x12.inode.Tag.TagType\"\x1f\n\x07TagType\x12\x08\n\x04\x46ILE\x10\x00\x12\n\n\x06\x46OLDER\x10\x01\"Q\n\x0cInodePayload\x12\x19\n\x03tag\x18\x01 \x01(\x0b\x32\n.inode.TagH\x00\x12\x1d\n\x05\x63hunk\x18\x02 \x01(\x0b\x32\x0c.inode.ChunkH\x00\x42\x07\n\x05ptype')
 )
 
 
 
-_INODE_NODETYPE = _descriptor.EnumDescriptor(
-  name='NodeType',
-  full_name='inode.Inode.NodeType',
+_TAG_TAGTYPE = _descriptor.EnumDescriptor(
+  name='TagType',
+  full_name='inode.Tag.TagType',
   filename=None,
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='CHUNK', index=0, number=0,
+      name='FILE', index=0, number=0,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FILE', index=1, number=1,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='FOLDER', index=2, number=2,
+      name='FOLDER', index=1, number=1,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=101,
-  serialized_end=144,
+  serialized_start=120,
+  serialized_end=151,
 )
-_sym_db.RegisterEnumDescriptor(_INODE_NODETYPE)
+_sym_db.RegisterEnumDescriptor(_TAG_TAGTYPE)
 
 
-_INODE = _descriptor.Descriptor(
-  name='Inode',
-  full_name='inode.Inode',
+_CHUNK = _descriptor.Descriptor(
+  name='Chunk',
+  full_name='inode.Chunk',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='version', full_name='inode.Inode.version', index=0,
-      number=1, type=5, cpp_type=1, label=2,
-      has_default_value=True, default_value=0,
+      name='payload', full_name='inode.Chunk.payload', index=0,
+      number=1, type=12, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='type', full_name='inode.Inode.type', index=1,
-      number=2, type=14, cpp_type=8, label=2,
+      name='length', full_name='inode.Chunk.length', index=1,
+      number=2, type=3, cpp_type=2, label=2,
       has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='tag', full_name='inode.Inode.tag', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -84,7 +73,6 @@ _INODE = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
-    _INODE_NODETYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -93,20 +81,124 @@ _INODE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=22,
-  serialized_end=144,
+  serialized_end=62,
 )
 
-_INODE.fields_by_name['type'].enum_type = _INODE_NODETYPE
-_INODE_NODETYPE.containing_type = _INODE
-DESCRIPTOR.message_types_by_name['Inode'] = _INODE
+
+_TAG = _descriptor.Descriptor(
+  name='Tag',
+  full_name='inode.Tag',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='inode.Tag.value', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='inode.Tag.type', index=1,
+      number=2, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _TAG_TAGTYPE,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=64,
+  serialized_end=151,
+)
+
+
+_INODEPAYLOAD = _descriptor.Descriptor(
+  name='InodePayload',
+  full_name='inode.InodePayload',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='tag', full_name='inode.InodePayload.tag', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='chunk', full_name='inode.InodePayload.chunk', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='ptype', full_name='inode.InodePayload.ptype',
+      index=0, containing_type=None, fields=[]),
+  ],
+  serialized_start=153,
+  serialized_end=234,
+)
+
+_TAG.fields_by_name['type'].enum_type = _TAG_TAGTYPE
+_TAG_TAGTYPE.containing_type = _TAG
+_INODEPAYLOAD.fields_by_name['tag'].message_type = _TAG
+_INODEPAYLOAD.fields_by_name['chunk'].message_type = _CHUNK
+_INODEPAYLOAD.oneofs_by_name['ptype'].fields.append(
+  _INODEPAYLOAD.fields_by_name['tag'])
+_INODEPAYLOAD.fields_by_name['tag'].containing_oneof = _INODEPAYLOAD.oneofs_by_name['ptype']
+_INODEPAYLOAD.oneofs_by_name['ptype'].fields.append(
+  _INODEPAYLOAD.fields_by_name['chunk'])
+_INODEPAYLOAD.fields_by_name['chunk'].containing_oneof = _INODEPAYLOAD.oneofs_by_name['ptype']
+DESCRIPTOR.message_types_by_name['Chunk'] = _CHUNK
+DESCRIPTOR.message_types_by_name['Tag'] = _TAG
+DESCRIPTOR.message_types_by_name['InodePayload'] = _INODEPAYLOAD
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-Inode = _reflection.GeneratedProtocolMessageType('Inode', (_message.Message,), dict(
-  DESCRIPTOR = _INODE,
+Chunk = _reflection.GeneratedProtocolMessageType('Chunk', (_message.Message,), dict(
+  DESCRIPTOR = _CHUNK,
   __module__ = 'inode_pb2'
-  # @@protoc_insertion_point(class_scope:inode.Inode)
+  # @@protoc_insertion_point(class_scope:inode.Chunk)
   ))
-_sym_db.RegisterMessage(Inode)
+_sym_db.RegisterMessage(Chunk)
+
+Tag = _reflection.GeneratedProtocolMessageType('Tag', (_message.Message,), dict(
+  DESCRIPTOR = _TAG,
+  __module__ = 'inode_pb2'
+  # @@protoc_insertion_point(class_scope:inode.Tag)
+  ))
+_sym_db.RegisterMessage(Tag)
+
+InodePayload = _reflection.GeneratedProtocolMessageType('InodePayload', (_message.Message,), dict(
+  DESCRIPTOR = _INODEPAYLOAD,
+  __module__ = 'inode_pb2'
+  # @@protoc_insertion_point(class_scope:inode.InodePayload)
+  ))
+_sym_db.RegisterMessage(InodePayload)
 
 
 # @@protoc_insertion_point(module_scope)
