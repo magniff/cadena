@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+
+package inode;
+
+
+message Inode {
+  enum NodeType {
+    CHUNK = 0;
+    FILE = 1;
+    FOLDER = 2;
+  }
+  required int32 version = 1 [default=0];
+  required NodeType type = 2;
+  optional string tag = 3;
+}
+
