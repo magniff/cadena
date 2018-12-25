@@ -92,3 +92,4 @@ def test_alchemy_driver_session_reuse(node, sqlite_engine):
         root_key = store(node, driver, session=session)
     with alchemy.driver.new_session(driver.db_engine) as session:
         assert node == lookup(root_key, driver, session=session)
+

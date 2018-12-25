@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+
+package dag;
+
+
+message DAGNode {
+  oneof node_type {
+    Commit commit = 1;
+    Tree tree = 2;
+    Blob blob = 3;
+    MBlob mblob = 4;
+  }
+}
+
+
+message Commit {
+}
+
+
+message Tree {
+  repeated string names = 1;
+}
+
+
+message Blob {
+  bytes data = 1;
+}
+
+
+message MBlob {
+}
+

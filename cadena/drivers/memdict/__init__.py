@@ -1,12 +1,12 @@
 from cadena.abc import AbstractDriver
-from cadena.drivers.common import DefaultLinkedNode, sha256_node_id
+from cadena.drivers.common import DefaultDAGNode, sha256_node_id
 
 
 class MemdictDriver(AbstractDriver):
 
     def __init__(self):
         self.storage = dict()
-        self.return_type = DefaultLinkedNode
+        self.return_type = DefaultDAGNode
         self.node_identifier = sha256_node_id
 
     def __len__(self):

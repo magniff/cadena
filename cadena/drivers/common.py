@@ -1,14 +1,18 @@
 import hashlib
 
 
-from cadena.abc import IdentifiedLinkedNode
+from cadena.abc import IdentifiedDAGNode
+
+
+def sha256_id(data, links):
+    return hashlib.sha256(data + b"".join(links)).digest()
 
 
 def sha256_node_id(node):
     return hashlib.sha256(node.data + b"".join(node.links)).digest()
 
 
-class DefaultLinkedNode(IdentifiedLinkedNode):
+class DefaultDAGNode(IdentifiedDAGNode):
 
     def __repr__(self):
         return "%s<data=%s;links=%s>" % (

@@ -5,7 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 from cadena.abc import AbstractDriver
-from cadena.drivers.common import DefaultLinkedNode, sha256_node_id
+from cadena.drivers.common import DefaultDAGNode, sha256_node_id
 
 
 from .db_objects import BaseMapping, Node, Link
@@ -47,7 +47,7 @@ class AlchemyDriver(AbstractDriver):
         # create db tables if no any
         BaseMapping.metadata.create_all(db_engine)
 
-        self.return_type = DefaultLinkedNode
+        self.return_type = DefaultDAGNode
         self.node_identifier = sha256_node_id
         self.db_engine = db_engine
 

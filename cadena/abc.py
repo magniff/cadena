@@ -21,7 +21,7 @@ NodeId = bytes
 NodePayload = bytes
 
 
-class UnidentifiedLinkedNode(WatchABCType):
+class UnidentifiedDAGNode(WatchABCType):
 
     data = InstanceOf(NodePayload)
     links = Container(InstanceOf(NodeId), container=list)
@@ -31,7 +31,7 @@ class UnidentifiedLinkedNode(WatchABCType):
         self.links = links
 
 
-class IdentifiedLinkedNode(UnidentifiedLinkedNode):
+class IdentifiedDAGNode(UnidentifiedDAGNode):
 
     id = InstanceOf(NodeId)
 
@@ -42,7 +42,7 @@ class IdentifiedLinkedNode(UnidentifiedLinkedNode):
 
 class AbstractDriver(WatchABCType):
 
-    return_type = SubclassOf(IdentifiedLinkedNode)
+    return_type = SubclassOf(IdentifiedDAGNode)
     node_identifier = InstanceOf(Callable)
 
     @abc.abstractmethod
@@ -50,23 +50,6 @@ class AbstractDriver(WatchABCType):
         pass
 
     @abc.abstractmethod
-    def lookup(self, node_id: NodeId) -> IdentifiedLinkedNode:
-        pass
-
-
-class AbstractInodeIOProvider(WatchABCType):
-
-    driver = InstanceOf(AbstractDriver)
-
-    @abc.abstractmethod
-    def compose_tag(self, tag_value, tag_type):
-        pass
-
-    @abc.abstractmethod
-    def compose_chunk(self, data):
-        pass
-
-    @abc.abstractmethod
-    def lookup(self, node_id: NodeId):
+    def lookup(self, node_id: NodeId) -> IdentifiedDAGNode:
         pass
 
