@@ -35,6 +35,10 @@ class IdentifiedDAGNode(UnidentifiedDAGNode):
 
     id = InstanceOf(NodeId)
 
+    @abc.abstractmethod
+    def to_mapping(self):
+        pass
+
     def __init__(self, id_maker, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = id_maker(self)

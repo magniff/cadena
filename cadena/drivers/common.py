@@ -23,4 +23,6 @@ class DefaultDAGNode(IdentifiedDAGNode):
     def from_mapping(cls, mapping, id_maker):
         return cls(id_maker=id_maker, **mapping)
 
+    def to_mapping(self):
+        return {"data": self.data, "links": self.links}
 
