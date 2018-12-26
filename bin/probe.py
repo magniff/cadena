@@ -15,11 +15,13 @@ def dump_node_stats(node):
     if isinstance(node, Commit):
         node_dict["parents"] = [parent.hex() for parent in node.parents]
         node_dict["tree"] = node.tree.hex()
+
     elif isinstance(node, Tree):
         node_dict["subtrees"] = {
             name: link.hex() for
             name, link in zip(node.packed_payload.names, node.links)
         }
+
     elif isinstance(node, Blob):
         node_dict["data"] = base64.urlsafe_b64encode(node.bytes).decode()
 
@@ -27,7 +29,7 @@ def dump_node_stats(node):
 
 
 @click.command()
-@click.option("--db_path", type=click.Path(exists=True), default="./storage.db")
+@click.option("--db_path", type=click.Path(exists=True), default="storage.db")
 @click.argument("commit", type=str)
 def cli(db_path, commit):
     driver = new_sqlite_driver_from_path(db_path)
