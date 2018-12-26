@@ -21,6 +21,13 @@ class DAGNode(WatchABCType):
     data = InstanceOf(bytes)
     links = Container(InstanceOf(bytes), container=list)
 
+    def __eq__(self, other):
+        return (
+            isinstance(self, type(other)) and
+            self.data == other.data and
+            self.links == other.links
+        )
+
     def __init__(self, data, links):
         self.data = data
         self.links = links

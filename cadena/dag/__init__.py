@@ -1,26 +1,48 @@
 import watch
 
 
-from cadena.abc import WatchABCType
+from cadena.abc import WatchABCType, DAGNode
 
 
-from .proto import NodeData, CommitData, TreeData, BlobData, MBlobData
+from .proto import GenericNode, CommitData, TreeData, BlobData, MBlobData
 
 
 def parse_bytes(data: bytes):
-    node = NodeData.FromString(data)
+    node = GenericNode.FromString(data)
     return getattr(node, node.WhichOneof("node_type"))
+
+
+def dump_to_dagnode(packed_node):
+    return packed_node.dump()
+
+
+def load_from_dagnode(dag_node):
+    correspondance = {
+        CommitData: Commit,
+        TreeData: Tree,
+        BlobData: Blob,
+        MBlobData: MBlob,
+    }
+
+    generic_node = GenericNode.FromString(dag_node.data)
+    node_payload = getattr(generic_node, generic_node.WhichOneof("node_type"))
+
+    return correspondance[type(node_payload)](
+        data=node_payload, links=dag_node.links
+    )
 
 
 class PBPackedNode(WatchABCType):
 
     links = watch.builtins.Container(
-        items=watch.builtins.InstanceOf(bytes),
-        container=list
+        items=watch.builtins.InstanceOf(bytes), container=list
     )
 
     def dump(self):
-        raise NotImplementedError()
+        return DAGNode(
+            links=self.links,
+            data=self.compose_generic_node().SerializeToString(),
+        )
 
     def __init__(self, data, links):
         self.data = data
@@ -32,6 +54,9 @@ class PBPackedNode(WatchABCType):
 
 class Commit(PBPackedNode):
     data = watch.builtins.InstanceOf(CommitData)
+
+    def compose_generic_node(self):
+        return GenericNode(commit=self.data)
 
     @classmethod
     def from_tree_parents(cls, tree, parents):
@@ -47,6 +72,9 @@ class Commit(PBPackedNode):
 class Tree(PBPackedNode):
     data = watch.builtins.InstanceOf(TreeData)
 
+    def compose_generic_node(self):
+        return GenericNode(tree=self.data)
+
     @classmethod
     def from_pairs(cls, pairs: list):
         """
@@ -61,6 +89,9 @@ class Tree(PBPackedNode):
 class Blob(PBPackedNode):
     data = watch.builtins.InstanceOf(BlobData)
 
+    def compose_generic_node(self):
+        return GenericNode(blob=self.data)
+
     @classmethod
     def from_data(cls, data: bytes):
         """
@@ -73,6 +104,9 @@ class Blob(PBPackedNode):
 
 class MBlob(PBPackedNode):
     data = watch.builtins.InstanceOf(MBlobData)
+
+    def compose_generic_node(self):
+        return GenericNode(mblob=self.data)
 
     @classmethod
     def from_links(cls, links: list):

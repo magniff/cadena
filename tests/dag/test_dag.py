@@ -2,7 +2,8 @@ import py.test
 
 
 from cadena.dag import (
-    Blob, BlobData, Commit, CommitData, Tree, TreeData, MBlob, MBlobData
+    Blob, BlobData, Commit, CommitData, Tree, TreeData, MBlob, MBlobData,
+    dump_to_dagnode, load_from_dagnode
 )
 
 
@@ -36,4 +37,11 @@ NODES = [
 @py.test.mark.parametrize("node,constructed_node", NODES)
 def test_constructors(node, constructed_node):
     assert node == constructed_node
+
+
+@py.test.mark.parametrize("node,constructed_node", NODES)
+def test_dump_load(node, constructed_node):
+    node_as_simple_dag_node = dump_to_dagnode(node)
+    assert node_as_simple_dag_node == dump_to_dagnode(constructed_node)
+    assert load_from_dagnode(node_as_simple_dag_node) == node
 
