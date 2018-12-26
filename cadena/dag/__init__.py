@@ -7,16 +7,14 @@ from cadena.abc import WatchABCType, DAGNode
 from .proto import GenericNode, CommitData, TreeData, BlobData, MBlobData
 
 
-def parse_bytes(data: bytes):
-    node = GenericNode.FromString(data)
-    return getattr(node, node.WhichOneof("node_type"))
-
-
-def dump_to_dagnode(packed_node):
+def dump_to_dagnode(packed_node) -> DAGNode:
     return packed_node.dump()
 
 
-def load_from_dagnode(dag_node):
+def load_from_dagnode(dag_node: DAGNode):
+    if dag_node is None:
+        return None
+
     correspondance = {
         CommitData: Commit,
         TreeData: Tree,
@@ -28,11 +26,11 @@ def load_from_dagnode(dag_node):
     node_payload = getattr(generic_node, generic_node.WhichOneof("node_type"))
 
     return correspondance[type(node_payload)](
-        data=node_payload, links=dag_node.links
+        packed_payload=node_payload, links=dag_node.links
     )
 
 
-class PBPackedNode(WatchABCType):
+class _PBPackedNode(WatchABCType):
 
     links = watch.builtins.Container(
         items=watch.builtins.InstanceOf(bytes), container=list
@@ -44,19 +42,30 @@ class PBPackedNode(WatchABCType):
             data=self.compose_generic_node().SerializeToString(),
         )
 
-    def __init__(self, data, links):
-        self.data = data
+    def __init__(self, packed_payload, links):
+        self.packed_payload = packed_payload
         self.links = links
 
     def __eq__(self, other):
-        return self.data == other.data and self.links == other.links
+        return (
+            self.packed_payload == other.packed_payload and
+            self.links == other.links
+        )
 
 
-class Commit(PBPackedNode):
-    data = watch.builtins.InstanceOf(CommitData)
+class Commit(_PBPackedNode):
+    packed_payload = watch.builtins.InstanceOf(CommitData)
 
     def compose_generic_node(self):
-        return GenericNode(commit=self.data)
+        return GenericNode(commit=self.packed_payload)
+
+    @property
+    def tree(self) -> bytes:
+        return self.links[0]
+
+    @property
+    def parents(self) -> list:
+        return self.links[1:]
 
     @classmethod
     def from_tree_parents(cls, tree, parents):
@@ -65,15 +74,18 @@ class Commit(PBPackedNode):
         parents::list<bytes>: list of links to parent commits
         """
         return cls(
-            data=CommitData(), links=[tree, *parents]
+            packed_payload=CommitData(), links=[tree, *parents]
         )
 
 
-class Tree(PBPackedNode):
-    data = watch.builtins.InstanceOf(TreeData)
+class Tree(_PBPackedNode):
+    packed_payload = watch.builtins.InstanceOf(TreeData)
+
+    def subtrees(self):
+        pass
 
     def compose_generic_node(self):
-        return GenericNode(tree=self.data)
+        return GenericNode(tree=self.packed_payload)
 
     @classmethod
     def from_pairs(cls, pairs: list):
@@ -82,15 +94,19 @@ class Tree(PBPackedNode):
         """
         return cls(
             links=[pair[1] for pair in pairs],
-            data=TreeData(names=[pair[0] for pair in pairs])
+            packed_payload=TreeData(names=[pair[0] for pair in pairs])
         )
 
 
-class Blob(PBPackedNode):
-    data = watch.builtins.InstanceOf(BlobData)
+class Blob(_PBPackedNode):
+    packed_payload = watch.builtins.InstanceOf(BlobData)
+
+    @property
+    def bytes(self):
+        return self.packed_payload.data
 
     def compose_generic_node(self):
-        return GenericNode(blob=self.data)
+        return GenericNode(blob=self.packed_payload)
 
     @classmethod
     def from_data(cls, data: bytes):
@@ -98,20 +114,20 @@ class Blob(PBPackedNode):
         data::bytes: binary string associated to the blob
         """
         return cls(
-            links=list(), data=BlobData(data=data),
+            links=list(), packed_payload=BlobData(data=data),
         )
 
 
-class MBlob(PBPackedNode):
+class MBlob(_PBPackedNode):
     data = watch.builtins.InstanceOf(MBlobData)
 
     def compose_generic_node(self):
-        return GenericNode(mblob=self.data)
+        return GenericNode(mblob=self.packed_payload)
 
     @classmethod
     def from_links(cls, links: list):
         """
         links::list<bytes>: list of links to other blobs and mblobs
         """
-        return cls(links=links, data=MBlobData())
+        return cls(links=links, packed_payload=MBlobData())
 

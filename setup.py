@@ -19,7 +19,7 @@ setuptools.setup(
     url="https://github.com/magniff/cadena",
     classifiers=classifiers,
     install_requires=[
-        "sqlalchemy", "watch", "protobuf",
+        "sqlalchemy", "watch", "protobuf", "click"
     ],
     packages=setuptools.find_packages(),
     zip_safe=False,
