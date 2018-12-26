@@ -27,6 +27,7 @@ def store_file(path, driver):
 
 
 def store_path(path, driver):
+    print(path.absolute())
     if path.is_file():
         return store_file(path, driver)
     else:

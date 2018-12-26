@@ -27,10 +27,10 @@ def dump_node_stats(node):
 
 
 @click.command()
-@click.argument("path_to_lookup", type=click.Path(exists=True))
+@click.option("--db_path", type=click.Path(exists=True), default="./storage.db")
 @click.argument("commit", type=str)
-def cli(path_to_lookup, commit):
-    driver = new_sqlite_driver_from_path(path_to_lookup)
+def cli(db_path, commit):
+    driver = new_sqlite_driver_from_path(db_path)
     some_node = load_from_dagnode(driver.lookup(node_id=bytes.fromhex(commit)))
 
     if some_node is not None:

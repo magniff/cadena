@@ -21,6 +21,12 @@ setuptools.setup(
     install_requires=[
         "sqlalchemy", "watch", "protobuf", "click"
     ],
+    entry_points={
+        "console_scripts": [
+            "store=bin.commit:cli",
+            "probe=bin.probe:cli",
+        ]
+    },
     packages=setuptools.find_packages(),
     zip_safe=False,
 )
