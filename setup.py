@@ -5,7 +5,7 @@ classifiers = [
     (
         "Programming Language :: Python :: %s" % x
     )
-    for x in "3.4 3.5 3.6 3.7".split()
+    for x in "3.5 3.6 3.7".split()
 ]
 
 
@@ -19,8 +19,14 @@ setuptools.setup(
     url="https://github.com/magniff/cadena",
     classifiers=classifiers,
     install_requires=[
-        "sqlalchemy", "watch"
+        "sqlalchemy", "watch", "protobuf", "click"
     ],
+    entry_points={
+        "console_scripts": [
+            "store=bin.commit:cli",
+            "probe=bin.probe:cli",
+        ]
+    },
     packages=setuptools.find_packages(),
     zip_safe=False,
 )

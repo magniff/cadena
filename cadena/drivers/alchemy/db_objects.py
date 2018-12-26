@@ -21,6 +21,5 @@ class Node(BaseMapping):
     __tablename__ = "nodes"
     id = Column(LargeBinary(length=32), primary_key=True)
     data = Column(LargeBinary)
-
     links = relationship(Link, primaryjoin=Link.parent == id)
 

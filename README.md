@@ -3,21 +3,36 @@
 [![Build Status](https://api.travis-ci.org/magniff/cadena.svg?branch=develop)](https://travis-ci.org/magniff/cadena)
 [![codecov](https://codecov.io/gh/magniff/cadena/branch/develop/graph/badge.svg)](https://codecov.io/gh/magniff/cadena)
 
-```python3
->>> from cadena.drivers.alchemy.helpers import new_sqlite_inmem_driver
->>>
->>> driver = new_sqlite_inmem_driver()
->>> key = driver.store(data=b"helloworld", links=[])
->>> print(key)
-b'\x93j\x18\\\xaa\xa2f\xbb\x9c\xbe\x98\x1e\x9e\x05\xcbx\xcds+\x0b2\x80\xeb\x94D\x12\xbbo\x8f\x8f\x07\xaf'
->>>
->>> lookup_result = driver.lookup(node_id=key)
->>> lookup_result
-DefaultLinkedNode<data=10;links=0>
->>> lookup_result.data
-b'helloworld'
->>> lookup_result.links
-[]
->>>
+```bash
+$ cat > hello.txt
+hello world contents
+$
+$ store hello.txt
+./hello.txt
+d2b19d07afc234fbd8b47813032d0ad21c21f20fe8e966359009b42651034a33
+$
+$ probe d2b19d07afc234fbd8b47813032d0ad21c21f20fe8e966359009b42651034a33
+{
+    "parents": [],
+    "tree": "6ffaf2e50c275ae1c2876848e0a640c80ebf1f6c4c9b74f9f7c2014aa055f52d",
+    "type": "Commit"
+}
+$
+$ probe 6ffaf2e50c275ae1c2876848e0a640c80ebf1f6c4c9b74f9f7c2014aa055f52d
+{
+    "subtrees": {
+        "hello.txt": "204b5f29880c02a1b431d109710171ebb8c7aad5f62927f07b0c0fc1f05a5e00"
+    },
+    "type": "Tree"
+}
+$
+$ probe 204b5f29880c02a1b431d109710171ebb8c7aad5f62927f07b0c0fc1f05a5e00
+{
+    "data": "aGVsbG8gd29ybGQgY29udGVudHMK",
+    "type": "Blob"
+}
+$
+$ echo "aGVsbG8gd29ybGQgY29udGVudHMK" | base64 -d -
+hello world contents
 ```
 

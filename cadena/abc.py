@@ -1,12 +1,12 @@
-from collections.abc import Callable
-
-
 import abc
+
+
+from collections.abc import Callable
 
 
 from watch import WatchMe
 from watch.core import AttributeControllerMeta
-from watch.builtins import InstanceOf, SubclassOf, Container
+from watch.builtins import InstanceOf, Container
 
 
 class WatchABCMetaType(abc.ABCMeta, AttributeControllerMeta):
@@ -17,39 +17,38 @@ class WatchABCType(abc.ABC, WatchMe, metaclass=WatchABCMetaType):
     pass
 
 
-NodeId = bytes
-NodePayload = bytes
+class DAGNode(WatchABCType):
+    data = InstanceOf(bytes)
+    links = Container(InstanceOf(bytes), container=list)
 
-
-class UnidentifiedLinkedNode(WatchABCType):
-
-    data = InstanceOf(NodePayload)
-    links = Container(InstanceOf(NodeId), container=list)
+    def __eq__(self, other):
+        return (
+            isinstance(self, type(other)) and
+            self.data == other.data and
+            self.links == other.links
+        )
 
     def __init__(self, data, links):
         self.data = data
         self.links = links
 
 
-class IdentifiedLinkedNode(UnidentifiedLinkedNode):
-
-    id = InstanceOf(NodeId)
-
-    def __init__(self, id_maker, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.id = id_maker(self)
-
-
 class AbstractDriver(WatchABCType):
+    """
+    store  :: dag_node -> bytes
+    lookup :: bytes -> dag_node
+    """
 
-    return_type = SubclassOf(IdentifiedLinkedNode)
     node_identifier = InstanceOf(Callable)
 
+    def __init__(self, node_identifier):
+        self.node_identifier = node_identifier
+
     @abc.abstractmethod
-    def store(self, data: NodePayload) -> NodeId:
+    def store(self, node: DAGNode) -> bytes:
         pass
 
     @abc.abstractmethod
-    def lookup(self, node_id: NodeId) -> IdentifiedLinkedNode:
+    def lookup(self, node_id: bytes) -> DAGNode:
         pass
 

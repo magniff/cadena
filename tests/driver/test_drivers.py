@@ -11,22 +11,26 @@ from sqlalchemy import create_engine
 
 import cadena.drivers.memdict as memdict
 import cadena.drivers.alchemy as alchemy
+from cadena.abc import DAGNode
 
 
 Nodes = s.deferred(lambda: s.tuples(s.binary(min_size=0, max_size=10), Links))
 Links = s.deferred(lambda: s.lists(Nodes, max_size=3, min_size=0))
 
 
-def store(node, driver, **kwargs):
-    data, links = node
+def store(pair, driver, **kwargs):
+    data, links = pair
+
     if not links:
-        return driver.store(data=data, links=links, **kwargs)
+        return driver.store(node=DAGNode(data=data, links=links), **kwargs)
     else:
         return driver.store(
-            data=data,
-            links=[
-                store(link, driver, **kwargs) for link in links
-            ],
+            node=DAGNode(
+                data=data,
+                links=[
+                    store(link, driver, **kwargs) for link in links
+                ]
+            ),
             **kwargs
         )
 
@@ -92,3 +96,4 @@ def test_alchemy_driver_session_reuse(node, sqlite_engine):
         root_key = store(node, driver, session=session)
     with alchemy.driver.new_session(driver.db_engine) as session:
         assert node == lookup(root_key, driver, session=session)
+

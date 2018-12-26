@@ -1,27 +1,17 @@
 from cadena.abc import AbstractDriver
-from cadena.drivers.common import DefaultLinkedNode, sha256_node_id
+from cadena.drivers.common import sha256_id
 
 
 class MemdictDriver(AbstractDriver):
 
     def __init__(self):
+        super().__init__(node_identifier=sha256_id)
         self.storage = dict()
-        self.return_type = DefaultLinkedNode
-        self.node_identifier = sha256_node_id
 
-    def __len__(self):
-        return len(self.storage)
-
-    def store(self, data, links=None):
-        node_instance = self.return_type.from_mapping(
-            {
-                "data": data,
-                "links": list() if links is None else links
-            },
-            id_maker=self.node_identifier
-        )
-        self.storage[node_instance.id] = node_instance
-        return node_instance.id
+    def store(self, node):
+        node_id = self.node_identifier(node)
+        self.storage[node_id] = node
+        return node_id
 
     def lookup(self, node_id):
         return self.storage.get(node_id, None)
