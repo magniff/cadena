@@ -42,8 +42,8 @@ def store_path(path, driver, session):
 
 @click.command()
 @click.argument("path_to_store", type=click.Path(exists=True))
-@click.option("--parrent", "-p", type=str, required=False)
-def cli(path_to_store, parrent):
+@click.option("--parent", "-p", type=str, required=False)
+def cli(path_to_store, parent):
     driver = new_sqlite_driver_from_path("./snapshot.db")
 
     with new_session_from_driver(driver) as session:
@@ -54,7 +54,7 @@ def cli(path_to_store, parrent):
                 session=session
             ),
             parents=(
-                [bytes.fromhex(parrent)] if parrent else []
+                [bytes.fromhex(parent)] if parent else []
             )
         )
         click.echo(
