@@ -29,7 +29,7 @@ def dump_node_stats(node):
 
 
 @click.command()
-@click.option("--db_path", type=click.Path(exists=True), default="storage.db")
+@click.option("--db_path", type=click.Path(exists=True), default="snapshot.db")
 @click.argument("commit", type=str)
 def cli(db_path, commit):
     driver = new_sqlite_driver_from_path(db_path)

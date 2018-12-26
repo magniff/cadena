@@ -44,7 +44,7 @@ def store_path(path, driver, session):
 @click.argument("path_to_store", type=click.Path(exists=True))
 @click.option("--parrent", "-p", type=str, required=False)
 def cli(path_to_store, parrent):
-    driver = new_sqlite_driver_from_path("./storage.db")
+    driver = new_sqlite_driver_from_path("./snapshot.db")
 
     with new_session_from_driver(driver) as session:
         commit = Commit.from_tree_parents(
