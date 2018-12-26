@@ -4,11 +4,11 @@ from contextlib import contextmanager
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 
-from cadena.abc import AbstractDriver
-from cadena.drivers.common import DefaultDAGNode, sha256_node_id
+from cadena.abc import AbstractDriver, DAGNode
+from cadena.drivers.common import sha256_id
 
 
-from .db_objects import BaseMapping, Node, Link
+from .db_objects import BaseMapping, Node as DBNode, Link as DBLink
 
 
 @contextmanager
@@ -44,42 +44,38 @@ def autosession(method):
 class AlchemyDriver(AbstractDriver):
 
     def __init__(self, db_engine):
-        # create db tables if no any
-        BaseMapping.metadata.create_all(db_engine)
-
-        self.return_type = DefaultDAGNode
-        self.node_identifier = sha256_node_id
+        super().__init__(node_identifier=sha256_id)
         self.db_engine = db_engine
+        BaseMapping.metadata.create_all(self.db_engine)
 
     @autosession
-    def store(self, *, data, links=None, session=None):
-        links = list() if links is None else links
-        snapshot_node = self.return_type.from_mapping(
-            id_maker=self.node_identifier,
-            mapping={"data": data, "links": links}
+    def store(self, *, node, session=None):
+        id_to_return = sha256_id(node)
+        if self.lookup(node_id=id_to_return, session=session) is not None:
+            return id_to_return
+
+        session.add(
+            DBNode(
+                id=id_to_return,
+                data=node.data,
+                links=[
+                    DBLink(child=link) for link in node.links
+                ]
+            )
         )
 
-        if self.lookup(node_id=snapshot_node.id, session=session):
-            return snapshot_node.id
-
-        node_data = Node(id=snapshot_node.id, data=snapshot_node.data)
-        for link in links:
-            node_data.links.append(Link(child=link))
-        session.add(node_data)
-
-        return snapshot_node.id
+        return id_to_return
 
     @autosession
     def lookup(self, *, node_id, session=None):
-        node_data_result = session.query(Node).filter_by(id=node_id).first()
+        db_node = session.query(DBNode).filter_by(id=node_id).first()
         return (
-            node_data_result and
-            self.return_type.from_mapping(
-                {
-                    "data": node_data_result.data,
-                    "links": [item.child for item in node_data_result.links]
-                },
-                id_maker=self.node_identifier
+            db_node and
+            DAGNode(
+                data=db_node.data,
+                links=[
+                    item.child for item in db_node.links
+                ]
             )
         )
 

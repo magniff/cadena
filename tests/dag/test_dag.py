@@ -20,8 +20,8 @@ NODES = [
             data=TreeData(names=["foo.py", "bar.py"]),
             links=[b"hex0", b"hex1"]
         ),
-        Tree.from_names_links(
-            names=["foo.py", "bar.py"], links=[b"hex0", b"hex1"]
+        Tree.from_pairs(
+            [("foo.py", b"hex0"), ("bar.py", b"hex1")]
         )
     ),
     (
@@ -35,6 +35,5 @@ NODES = [
 
 @py.test.mark.parametrize("node,constructed_node", NODES)
 def test_constructors(node, constructed_node):
-    assert node.id
     assert node == constructed_node
 

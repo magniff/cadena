@@ -1,8 +1,7 @@
 import watch
 
 
-from cadena.abc import IdentifiedDAGNode
-from cadena.drivers.common import sha256_id
+from cadena.abc import WatchABCType
 
 
 from .proto import NodeData, CommitData, TreeData, BlobData, MBlobData
@@ -13,31 +12,25 @@ def parse_bytes(data: bytes):
     return getattr(node, node.WhichOneof("node_type"))
 
 
-def protobuf_id_maker(node):
-    return sha256_id(**node.to_mapping())
+class PBPackedNode(WatchABCType):
 
+    links = watch.builtins.Container(
+        items=watch.builtins.InstanceOf(bytes),
+        container=list
+    )
 
-class ProtobufDAGNode(IdentifiedDAGNode):
-    data = watch.builtins.InstanceOf(NodeData)
+    def dump(self):
+        raise NotImplementedError()
+
+    def __init__(self, data, links):
+        self.data = data
+        self.links = links
 
     def __eq__(self, other):
         return self.data == other.data and self.links == other.links
 
-    def to_mapping(self):
-        return {
-            "links": self.links,
-            "data": NodeData(
-                **{
-                    type(self).__qualname__.lower(): self.data
-                }
-            ).SerializeToString()
-        }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(id_maker=protobuf_id_maker, *args, **kwargs)
-
-
-class Commit(ProtobufDAGNode):
+class Commit(PBPackedNode):
     data = watch.builtins.InstanceOf(CommitData)
 
     @classmethod
@@ -51,21 +44,21 @@ class Commit(ProtobufDAGNode):
         )
 
 
-class Tree(ProtobufDAGNode):
+class Tree(PBPackedNode):
     data = watch.builtins.InstanceOf(TreeData)
 
     @classmethod
-    def from_names_links(cls, names, links):
+    def from_pairs(cls, pairs: list):
         """
-        names::list<str>: list of "filenames"
-        links::list<bytes>: list of links to "file" structures
+        pairs::list<(string, bytes)>: name-link pairs
         """
         return cls(
-            links=links, data=TreeData(names=names)
+            links=[pair[1] for pair in pairs],
+            data=TreeData(names=[pair[0] for pair in pairs])
         )
 
 
-class Blob(ProtobufDAGNode):
+class Blob(PBPackedNode):
     data = watch.builtins.InstanceOf(BlobData)
 
     @classmethod
@@ -78,7 +71,7 @@ class Blob(ProtobufDAGNode):
         )
 
 
-class MBlob(ProtobufDAGNode):
+class MBlob(PBPackedNode):
     data = watch.builtins.InstanceOf(MBlobData)
 
     @classmethod
