@@ -10,7 +10,7 @@ from cadena.dag import Commit, Blob, Tree, load_from_dagnode, NAMESPACE
 
 
 def dump_node_stats(node):
-    node_dict = {"type": type(node).__qualname__}
+    node_dict = {"type": type(node).__qualname__.upper()}
 
     if isinstance(node, Commit):
         node_dict["parents"] = [parent.hex() for parent in node.parents]

@@ -23,12 +23,28 @@ def store_dir(path, driver, session):
     return driver.store(node=tree.dump(), session=session)
 
 
-def store_file(path, driver, session):
+def store_file(path, driver, session, self_namespace=False):
     with open(str(path.absolute()), "rb") as f:
-        return driver.store(
+        blob_id = driver.store(
             node=Blob.from_data(data=f.read()).dump(),
             session=session
         )
+
+    if not self_namespace:
+        id_to_return = blob_id
+    else:
+        id_to_return = driver.store(
+            node=Tree.from_description(
+                tree_type=NAMESPACE,
+                link_descriptors=[
+                    LinkDescriptor(
+                        endpoint=blob_id, name=path.name, link_type=DATA
+                    )
+                ]
+            ).dump(),
+            session=session
+        )
+    return id_to_return
 
 
 def store_path(path, driver, session):
@@ -44,18 +60,19 @@ def store_path(path, driver, session):
 @click.option("--parent", "-p", type=str, required=False)
 def cli(path_to_store, parent):
     driver = new_sqlite_driver_from_path("snapshot.db")
+    path = pathlib.Path(path_to_store)
 
     with new_session_from_driver(driver) as session:
+        if path.is_file():
+            root_tree = store_file(path, driver, session, self_namespace=True)
+        else:
+            root_tree = store_path(path=path, driver=driver, session=session)
+
         commit = Commit.from_tree_parents(
-            tree=store_path(
-                path=pathlib.Path(path_to_store),
-                driver=driver,
-                session=session
-            ),
-            parents=(
-                [bytes.fromhex(parent)] if parent else []
-            )
+            tree=root_tree,
+            parents=[bytes.fromhex(parent)] if parent else []
         )
+
         click.echo(
             driver.store(node=commit.dump(), session=session).hex()
         )
