@@ -2,8 +2,8 @@ import py.test
 
 
 from cadena.dag import (
-    Blob, BlobData, Commit, CommitData, Tree, TreeData, MBlob, MBlobData,
-    dump_to_dagnode, load_from_dagnode
+    Blob, BlobData, Commit, CommitData, Tree, TreeData, LinkDescriptor,
+    dump_to_dagnode, load_from_dagnode, DATA, NAMESPACE, LinkMeta
 )
 
 
@@ -13,16 +13,45 @@ NODES = [
         Blob.from_data(data=b"helloworld"),
     ),
     (
-        MBlob(packed_payload=MBlobData(), links=[b"hex0", b"hex1", b"hex2"]),
-        MBlob.from_links(links=[b"hex0", b"hex1", b"hex2"]),
+        Tree(
+            packed_payload=TreeData(
+                type=DATA,
+                mdata=[
+                    LinkMeta(type=DATA, name=None),
+                    LinkMeta(type=DATA, name=None),
+                ]
+            ),
+            links=[b"hex0", b"hex1"]
+        ),
+        Tree.from_description(
+            tree_type=DATA,
+            link_descriptors=[
+                LinkDescriptor(name=None, endpoint=b"hex0", link_type=DATA),
+                LinkDescriptor(name=None, endpoint=b"hex1", link_type=DATA),
+            ]
+        )
     ),
     (
         Tree(
-            packed_payload=TreeData(names=["foo.py", "bar.py"]),
+            packed_payload=TreeData(
+                type=NAMESPACE,
+                mdata=[
+                    LinkMeta(type=DATA, name="helloworld"),
+                    LinkMeta(type=NAMESPACE, name="morestuff"),
+                ]
+            ),
             links=[b"hex0", b"hex1"]
         ),
-        Tree.from_pairs(
-            [("foo.py", b"hex0"), ("bar.py", b"hex1")]
+        Tree.from_description(
+            tree_type=NAMESPACE,
+            link_descriptors=[
+                LinkDescriptor(
+                    name="helloworld", endpoint=b"hex0", link_type=DATA
+                ),
+                LinkDescriptor(
+                    name="morestuff", endpoint=b"hex1", link_type=NAMESPACE
+                ),
+            ]
         )
     ),
     (

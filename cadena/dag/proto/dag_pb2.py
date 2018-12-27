@@ -3,6 +3,7 @@
 
 import sys
 _b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
+from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
@@ -19,9 +20,34 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='dag',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\tdag.proto\x12\x03\x64\x61g\"\x88\x01\n\x07\x44\x41GNode\x12\x1d\n\x06\x63ommit\x18\x01 \x01(\x0b\x32\x0b.dag.CommitH\x00\x12\x19\n\x04tree\x18\x02 \x01(\x0b\x32\t.dag.TreeH\x00\x12\x19\n\x04\x62lob\x18\x03 \x01(\x0b\x32\t.dag.BlobH\x00\x12\x1b\n\x05mblob\x18\x04 \x01(\x0b\x32\n.dag.MBlobH\x00\x42\x0b\n\tnode_type\"\x08\n\x06\x43ommit\"\x15\n\x04Tree\x12\r\n\x05names\x18\x01 \x03(\t\"\x14\n\x04\x42lob\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\"\x07\n\x05MBlobb\x06proto3')
+  serialized_pb=_b('\n\tdag.proto\x12\x03\x64\x61g\"k\n\x07\x44\x41GNode\x12\x1d\n\x06\x63ommit\x18\x01 \x01(\x0b\x32\x0b.dag.CommitH\x00\x12\x19\n\x04tree\x18\x02 \x01(\x0b\x32\t.dag.TreeH\x00\x12\x19\n\x04\x62lob\x18\x03 \x01(\x0b\x32\t.dag.BlobH\x00\x42\x0b\n\tnode_type\"\x08\n\x06\x43ommit\"=\n\x10TreeLinkMetadata\x12\x1b\n\x04type\x18\x01 \x01(\x0e\x32\r.dag.NodeType\x12\x0c\n\x04name\x18\x02 \x01(\t\"I\n\x04Tree\x12\x1b\n\x04type\x18\x01 \x01(\x0e\x32\r.dag.NodeType\x12$\n\x05mdata\x18\x02 \x03(\x0b\x32\x15.dag.TreeLinkMetadata\"\x14\n\x04\x42lob\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c*#\n\x08NodeType\x12\r\n\tNAMESPACE\x10\x00\x12\x08\n\x04\x44\x41TA\x10\x01\x62\x06proto3')
 )
 
+_NODETYPE = _descriptor.EnumDescriptor(
+  name='NodeType',
+  full_name='dag.NodeType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='NAMESPACE', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='DATA', index=1, number=1,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=297,
+  serialized_end=332,
+)
+_sym_db.RegisterEnumDescriptor(_NODETYPE)
+
+NodeType = enum_type_wrapper.EnumTypeWrapper(_NODETYPE)
+NAMESPACE = 0
+DATA = 1
 
 
 
@@ -53,13 +79,6 @@ _DAGNODE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='mblob', full_name='dag.DAGNode.mblob', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -75,8 +94,8 @@ _DAGNODE = _descriptor.Descriptor(
       name='node_type', full_name='dag.DAGNode.node_type',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=19,
-  serialized_end=155,
+  serialized_start=18,
+  serialized_end=125,
 )
 
 
@@ -99,8 +118,46 @@ _COMMIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=157,
-  serialized_end=165,
+  serialized_start=127,
+  serialized_end=135,
+)
+
+
+_TREELINKMETADATA = _descriptor.Descriptor(
+  name='TreeLinkMetadata',
+  full_name='dag.TreeLinkMetadata',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='type', full_name='dag.TreeLinkMetadata.type', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='dag.TreeLinkMetadata.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=137,
+  serialized_end=198,
 )
 
 
@@ -112,8 +169,15 @@ _TREE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='names', full_name='dag.Tree.names', index=0,
-      number=1, type=9, cpp_type=9, label=3,
+      name='type', full_name='dag.Tree.type', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='mdata', full_name='dag.Tree.mdata', index=1,
+      number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -130,8 +194,8 @@ _TREE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=167,
-  serialized_end=188,
+  serialized_start=200,
+  serialized_end=273,
 )
 
 
@@ -161,38 +225,13 @@ _BLOB = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=190,
-  serialized_end=210,
-)
-
-
-_MBLOB = _descriptor.Descriptor(
-  name='MBlob',
-  full_name='dag.MBlob',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=212,
-  serialized_end=219,
+  serialized_start=275,
+  serialized_end=295,
 )
 
 _DAGNODE.fields_by_name['commit'].message_type = _COMMIT
 _DAGNODE.fields_by_name['tree'].message_type = _TREE
 _DAGNODE.fields_by_name['blob'].message_type = _BLOB
-_DAGNODE.fields_by_name['mblob'].message_type = _MBLOB
 _DAGNODE.oneofs_by_name['node_type'].fields.append(
   _DAGNODE.fields_by_name['commit'])
 _DAGNODE.fields_by_name['commit'].containing_oneof = _DAGNODE.oneofs_by_name['node_type']
@@ -202,14 +241,15 @@ _DAGNODE.fields_by_name['tree'].containing_oneof = _DAGNODE.oneofs_by_name['node
 _DAGNODE.oneofs_by_name['node_type'].fields.append(
   _DAGNODE.fields_by_name['blob'])
 _DAGNODE.fields_by_name['blob'].containing_oneof = _DAGNODE.oneofs_by_name['node_type']
-_DAGNODE.oneofs_by_name['node_type'].fields.append(
-  _DAGNODE.fields_by_name['mblob'])
-_DAGNODE.fields_by_name['mblob'].containing_oneof = _DAGNODE.oneofs_by_name['node_type']
+_TREELINKMETADATA.fields_by_name['type'].enum_type = _NODETYPE
+_TREE.fields_by_name['type'].enum_type = _NODETYPE
+_TREE.fields_by_name['mdata'].message_type = _TREELINKMETADATA
 DESCRIPTOR.message_types_by_name['DAGNode'] = _DAGNODE
 DESCRIPTOR.message_types_by_name['Commit'] = _COMMIT
+DESCRIPTOR.message_types_by_name['TreeLinkMetadata'] = _TREELINKMETADATA
 DESCRIPTOR.message_types_by_name['Tree'] = _TREE
 DESCRIPTOR.message_types_by_name['Blob'] = _BLOB
-DESCRIPTOR.message_types_by_name['MBlob'] = _MBLOB
+DESCRIPTOR.enum_types_by_name['NodeType'] = _NODETYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 DAGNode = _reflection.GeneratedProtocolMessageType('DAGNode', (_message.Message,), dict(
@@ -226,6 +266,13 @@ Commit = _reflection.GeneratedProtocolMessageType('Commit', (_message.Message,),
   ))
 _sym_db.RegisterMessage(Commit)
 
+TreeLinkMetadata = _reflection.GeneratedProtocolMessageType('TreeLinkMetadata', (_message.Message,), dict(
+  DESCRIPTOR = _TREELINKMETADATA,
+  __module__ = 'dag_pb2'
+  # @@protoc_insertion_point(class_scope:dag.TreeLinkMetadata)
+  ))
+_sym_db.RegisterMessage(TreeLinkMetadata)
+
 Tree = _reflection.GeneratedProtocolMessageType('Tree', (_message.Message,), dict(
   DESCRIPTOR = _TREE,
   __module__ = 'dag_pb2'
@@ -239,13 +286,6 @@ Blob = _reflection.GeneratedProtocolMessageType('Blob', (_message.Message,), dic
   # @@protoc_insertion_point(class_scope:dag.Blob)
   ))
 _sym_db.RegisterMessage(Blob)
-
-MBlob = _reflection.GeneratedProtocolMessageType('MBlob', (_message.Message,), dict(
-  DESCRIPTOR = _MBLOB,
-  __module__ = 'dag_pb2'
-  # @@protoc_insertion_point(class_scope:dag.MBlob)
-  ))
-_sym_db.RegisterMessage(MBlob)
 
 
 # @@protoc_insertion_point(module_scope)

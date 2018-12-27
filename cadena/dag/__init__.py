@@ -4,7 +4,9 @@ import watch
 from cadena.abc import WatchABCType, DAGNode
 
 
-from .proto import GenericNode, CommitData, TreeData, BlobData, MBlobData
+from .proto import GenericNode, CommitData, TreeData, BlobData, LinkMeta
+# pls dont remove next line
+from .proto import NAMESPACE, DATA
 
 
 def dump_to_dagnode(packed_node) -> DAGNode:
@@ -19,7 +21,6 @@ def load_from_dagnode(dag_node: DAGNode):
         CommitData: Commit,
         TreeData: Tree,
         BlobData: Blob,
-        MBlobData: MBlob,
     }
 
     generic_node = GenericNode.FromString(dag_node.data)
@@ -53,6 +54,17 @@ class _PBPackedNode(WatchABCType):
         )
 
 
+class LinkDescriptor(watch.WatchMe):
+    name = watch.builtins.InstanceOf(str) | watch.builtins.Just(None)
+    endpoint = watch.builtins.InstanceOf(bytes)
+    link_type = watch.builtins.Just(DATA, NAMESPACE)
+
+    def __init__(self, name, endpoint, link_type):
+        self.link_type = link_type
+        self.name = name
+        self.endpoint = endpoint
+
+
 class Commit(_PBPackedNode):
     packed_payload = watch.builtins.InstanceOf(CommitData)
 
@@ -81,20 +93,40 @@ class Commit(_PBPackedNode):
 class Tree(_PBPackedNode):
     packed_payload = watch.builtins.InstanceOf(TreeData)
 
-    def subtrees(self):
-        pass
-
     def compose_generic_node(self):
         return GenericNode(tree=self.packed_payload)
 
     @classmethod
-    def from_pairs(cls, pairs: list):
+    def from_description(cls, tree_type, link_descriptors: list):
         """
         pairs::list<(string, bytes)>: name-link pairs
         """
+
+        # sanity check block
+        if tree_type == DATA:
+            all_fine = all(
+                descriptor.name is None and descriptor.link_type == DATA
+                for descriptor in link_descriptors
+            )
+        elif tree_type == NAMESPACE:
+            all_fine = all(
+                descriptor.name is not None for descriptor in link_descriptors
+            )
+        else:
+            all_fine = False
+
+        if not all_fine:
+            raise ValueError("Misconfigured Tree node")
+
         return cls(
-            links=[pair[1] for pair in pairs],
-            packed_payload=TreeData(names=[pair[0] for pair in pairs])
+            packed_payload=TreeData(
+                type=tree_type,
+                mdata=[
+                    LinkMeta(type=descriptor.link_type, name=descriptor.name)
+                    for descriptor in link_descriptors
+                ]
+            ),
+            links=[descriptor.endpoint for descriptor in link_descriptors]
         )
 
 
@@ -116,18 +148,4 @@ class Blob(_PBPackedNode):
         return cls(
             links=list(), packed_payload=BlobData(data=data),
         )
-
-
-class MBlob(_PBPackedNode):
-    data = watch.builtins.InstanceOf(MBlobData)
-
-    def compose_generic_node(self):
-        return GenericNode(mblob=self.packed_payload)
-
-    @classmethod
-    def from_links(cls, links: list):
-        """
-        links::list<bytes>: list of links to other blobs and mblobs
-        """
-        return cls(links=links, packed_payload=MBlobData())
 
