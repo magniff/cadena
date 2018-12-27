@@ -59,7 +59,7 @@ class LinkDescriptor(watch.WatchMe):
     endpoint = watch.builtins.InstanceOf(bytes)
     link_type = watch.builtins.Just(DATA, NAMESPACE)
 
-    def __init__(self, name, endpoint, link_type):
+    def __init__(self, endpoint, link_type, name=None):
         self.link_type = link_type
         self.name = name
         self.endpoint = endpoint
@@ -95,6 +95,10 @@ class Tree(_PBPackedNode):
 
     def compose_generic_node(self):
         return GenericNode(tree=self.packed_payload)
+
+    @property
+    def type(self):
+        return self.packed_payload.type
 
     @classmethod
     def from_description(cls, tree_type, link_descriptors: list):

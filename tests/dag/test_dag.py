@@ -26,8 +26,8 @@ NODES = [
         Tree.from_description(
             tree_type=DATA,
             link_descriptors=[
-                LinkDescriptor(name=None, endpoint=b"hex0", link_type=DATA),
-                LinkDescriptor(name=None, endpoint=b"hex1", link_type=DATA),
+                LinkDescriptor(endpoint=b"hex0", link_type=DATA),
+                LinkDescriptor(endpoint=b"hex1", link_type=DATA),
             ]
         )
     ),

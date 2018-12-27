@@ -5,14 +5,17 @@ import pathlib
 from cadena.drivers.alchemy.helpers import (
     new_sqlite_driver_from_path, new_session_from_driver
 )
-from cadena.dag import Commit, Blob, Tree
+from cadena.dag import Commit, Blob, Tree, LinkDescriptor, DATA, NAMESPACE
 
 
 def store_dir(path, driver, session):
-    tree = Tree.from_pairs(
-        [
-            (
-                subpath.name, store_path(subpath, driver, session)
+    tree = Tree.from_description(
+        tree_type=NAMESPACE,
+        link_descriptors=[
+            LinkDescriptor(
+                link_type=NAMESPACE if subpath.is_dir() else DATA,
+                name=subpath.name,
+                endpoint=store_path(subpath, driver, session)
             )
             for subpath in path.iterdir()
         ]
@@ -22,14 +25,10 @@ def store_dir(path, driver, session):
 
 def store_file(path, driver, session):
     with open(str(path.absolute()), "rb") as f:
-        blob_id = driver.store(
+        return driver.store(
             node=Blob.from_data(data=f.read()).dump(),
             session=session
         )
-    return driver.store(
-        node=Tree.from_pairs([(path.name, blob_id)]).dump(),
-        session=session
-    )
 
 
 def store_path(path, driver, session):
@@ -44,7 +43,7 @@ def store_path(path, driver, session):
 @click.argument("path_to_store", type=click.Path(exists=True))
 @click.option("--parent", "-p", type=str, required=False)
 def cli(path_to_store, parent):
-    driver = new_sqlite_driver_from_path("./snapshot.db")
+    driver = new_sqlite_driver_from_path("snapshot.db")
 
     with new_session_from_driver(driver) as session:
         commit = Commit.from_tree_parents(

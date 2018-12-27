@@ -6,7 +6,7 @@ import click
 
 
 from cadena.drivers.alchemy.helpers import new_sqlite_driver_from_path
-from cadena.dag import Commit, Blob, Tree, load_from_dagnode
+from cadena.dag import Commit, Blob, Tree, load_from_dagnode, NAMESPACE
 
 
 def dump_node_stats(node):
@@ -17,9 +17,15 @@ def dump_node_stats(node):
         node_dict["tree"] = node.tree.hex()
 
     elif isinstance(node, Tree):
+        node_dict["type"] = (
+            "NAMESPACE" if node.type == NAMESPACE else "DATA"
+        )
         node_dict["subtrees"] = {
-            name: link.hex() for
-            name, link in zip(node.packed_payload.names, node.links)
+            link.hex(): {
+                "name": link_meta.name,
+                "type": "NAMESPACE" if link_meta.type == NAMESPACE else "DATA"
+            }
+            for link_meta, link in zip(node.packed_payload.mdata, node.links)
         }
 
     elif isinstance(node, Blob):
