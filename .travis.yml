@@ -17,7 +17,7 @@ python:
 
 before_install:
   - docker pull mongo:latest
-  - docker run -p 27017:27017 -p 27018:27018 -p 27019:27019 mongo:latest
+  - docker run -p 27017:27017 -p 27018:27018 -p 27019:27019 -d mongo:latest
 
 
 install:
