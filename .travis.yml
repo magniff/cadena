@@ -1,6 +1,10 @@
 language: python
 
 
+services:
+  - docker
+
+
 os:
   - linux
 
@@ -11,12 +15,19 @@ python:
   - pypy3
 
 
+before_install:
+  - docker pull mongo:latest
+  - docker run -p 27017:27017 -p 27018:27018 -p 27019:27019 mongo:latest
+
+
 install:
   - pip install hypothesis
   - pip install pytest
   - pip install codecov
   - pip install pytest-cov
   - python setup.py develop
+
+
 script: py.test --runslow --cov=./cadena/ tests/
 
 
