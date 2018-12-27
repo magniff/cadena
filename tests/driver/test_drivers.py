@@ -11,6 +11,9 @@ from sqlalchemy import create_engine
 
 import cadena.drivers.memdict as memdict
 import cadena.drivers.alchemy as alchemy
+import cadena.drivers.mongo as mongo
+
+
 from cadena.abc import DAGNode
 
 
@@ -46,6 +49,14 @@ def lookup(node_id, driver, **kwargs):
 @py.test.fixture(scope="function")
 def sqlite_engine():
     yield create_engine("sqlite:///:memory:")
+
+
+@py.test.mark.slow
+@given(node=Nodes)
+@settings(suppress_health_check=[HealthCheck.too_slow])
+def test_mongo_driver(node):
+    driver = mongo.MongoDriver()
+    assert node == lookup(store(node, driver), driver)
 
 
 @py.test.mark.slow
