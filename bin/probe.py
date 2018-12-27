@@ -1,5 +1,6 @@
 import json
 import base64
+import sys
 
 
 import click
@@ -20,30 +21,40 @@ def dump_node_stats(node):
         node_dict["type"] = (
             "NAMESPACE" if node.type == NAMESPACE else "DATA"
         )
-        node_dict["subtrees"] = {
-            link.hex(): {
+        node_dict["subtrees"] = [
+            {
+                "id": link.hex(),
                 "name": link_meta.name,
                 "type": "NAMESPACE" if link_meta.type == NAMESPACE else "DATA"
             }
             for link_meta, link in zip(node.packed_payload.mdata, node.links)
-        }
+        ]
 
     elif isinstance(node, Blob):
-        node_dict["data"] = base64.urlsafe_b64encode(node.bytes).decode()
+        node_dict["data"] = base64.b64encode(node.bytes).decode()
 
     return node_dict
 
 
 @click.command()
 @click.option("--db_path", type=click.Path(exists=True), default="snapshot.db")
-@click.argument("commit", type=str)
-def cli(db_path, commit):
-    driver = new_sqlite_driver_from_path(db_path)
-    some_node = load_from_dagnode(driver.lookup(node_id=bytes.fromhex(commit)))
-
-    if some_node is not None:
+@click.argument("tree_id", type=str)
+def cli(db_path, tree_id):
+    # try to parse tree_id
+    try:
+        tree_id_native = bytes.fromhex(tree_id)
+    except ValueError:
         click.echo(
-            json.dumps(dump_node_stats(some_node), indent=4, sort_keys=True)
+            "Fatal: %s is not a valid tree id." % tree_id,
+            err=True, color="red"
+        )
+        sys.exit(1)
+
+    driver = new_sqlite_driver_from_path(db_path)
+    maybe_tree = load_from_dagnode(driver.lookup(node_id=tree_id_native))
+    if maybe_tree is not None:
+        click.echo(
+            json.dumps(dump_node_stats(maybe_tree), indent=4, sort_keys=True)
         )
 
 
