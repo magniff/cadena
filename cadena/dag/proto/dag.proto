@@ -4,30 +4,44 @@ syntax = "proto3";
 package dag;
 
 
+// Where link points to
+ enum NodeType {
+    NAMESPACE = 0;
+    DATA = 1;
+  }
+
+
 message DAGNode {
+
   oneof node_type {
     Commit commit = 1;
     Tree tree = 2;
     Blob blob = 3;
-    MBlob mblob = 4;
   }
+
 }
 
 
+// No data available, just a type placeholder
 message Commit {
 }
 
 
-message Tree {
-  repeated string names = 1;
+message TreeLinkMetadata {
+  NodeType type = 1;
+  string name = 2;
 }
 
 
+// A bunch of links to Trees, Blobs and MBlobs
+message Tree {
+  NodeType type = 1;
+  repeated TreeLinkMetadata mdata = 2;
+}
+
+
+// Data only, no links allowed
 message Blob {
   bytes data = 1;
-}
-
-
-message MBlob {
 }
 
