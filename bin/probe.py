@@ -7,7 +7,7 @@ import click
 
 
 from cadena.drivers.alchemy.helpers import new_sqlite_driver_from_path
-from cadena.dag import Commit, Blob, Tree, load_from_dagnode, NAMESPACE
+from cadena.fslike_dag import Commit, Blob, Tree, load_from_dagnode, NAMESPACE
 
 
 def dump_node_stats(node):

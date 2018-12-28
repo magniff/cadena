@@ -7,7 +7,7 @@ from cadena.drivers.alchemy.helpers import (
 )
 
 
-from cadena.dag import Blob, Tree, LinkDescriptor, DATA, NAMESPACE
+from cadena.fslike_dag import Blob, Tree, LinkDescriptor, DATA, NAMESPACE
 
 
 def store_dir(path, driver, session):

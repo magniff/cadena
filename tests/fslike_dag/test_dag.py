@@ -1,7 +1,7 @@
 import py.test
 
 
-from cadena.dag import (
+from cadena.fslike_dag import (
     Blob, BlobData, Commit, CommitData, Tree, TreeData, LinkDescriptor,
     dump_to_dagnode, load_from_dagnode, DATA, NAMESPACE, LinkMeta
 )
