@@ -28,7 +28,7 @@ install:
   - python setup.py develop
 
 
-script: py.test --runslow --cov=./cadena/ tests/
+script: py.test --runslow --external --cov=./cadena/ tests/
 
 
 after_success:
