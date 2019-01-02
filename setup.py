@@ -23,7 +23,7 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "store=bin.commit:cli",
+            "store=bin.store:cli",
             "probe=bin.probe:cli",
         ]
     },

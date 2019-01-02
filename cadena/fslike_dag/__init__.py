@@ -102,10 +102,6 @@ class Tree(_PBPackedNode):
 
     @classmethod
     def from_description(cls, tree_type, link_descriptors: list):
-        """
-        pairs::list<(string, bytes)>: name-link pairs
-        """
-
         # sanity check block
         if tree_type == DATA:
             all_fine = all(
@@ -150,6 +146,7 @@ class Blob(_PBPackedNode):
         data::bytes: binary string associated to the blob
         """
         return cls(
-            links=list(), packed_payload=BlobData(data=data),
+            packed_payload=BlobData(data=data),
+            links=list(),
         )
 
