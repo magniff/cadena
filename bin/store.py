@@ -7,17 +7,19 @@ from cadena.drivers.alchemy.helpers import (
 )
 
 
-from cadena.fslike_dag import Blob, Tree, LinkDescriptor, DATA, NAMESPACE
+from cadena.fslike_dag import (
+    Blob, Tree, NamedLink, ChunkEndpoint, NamespaceEndpoint
+)
 
 
 def store_dir(path, driver, session):
-    tree = Tree.from_description(
-        tree_type=NAMESPACE,
+    tree = Tree.from_links_description(
         link_descriptors=[
-            LinkDescriptor(
-                link_type=NAMESPACE if subpath.is_dir() else DATA,
+            NamedLink(
                 name=subpath.name,
-                endpoint=store_path(subpath, driver, session)
+                endpoint=NamespaceEndpoint(
+                    id=store_path(subpath, driver, session)
+                )
             )
             for subpath in path.iterdir()
         ]
@@ -27,8 +29,9 @@ def store_dir(path, driver, session):
 
 def store_file(path, driver, session, self_namespace=False):
     with open(str(path.absolute()), "rb") as f:
+        binary_data = f.read()
         blob_id = driver.store(
-            node=Blob.from_data(data=f.read()).dump(),
+            node=Blob.from_data(data=binary_data).dump(),
             session=session
         )
 
@@ -36,11 +39,13 @@ def store_file(path, driver, session, self_namespace=False):
         id_to_return = blob_id
     else:
         id_to_return = driver.store(
-            node=Tree.from_description(
-                tree_type=NAMESPACE,
+            node=Tree.from_links_description(
                 link_descriptors=[
-                    LinkDescriptor(
-                        endpoint=blob_id, name=path.name, link_type=DATA
+                    NamedLink(
+                        name=path.name,
+                        endpoint=ChunkEndpoint(
+                            id=blob_id, span=(0, len(binary_data))
+                        )
                     )
                 ]
             ).dump(),

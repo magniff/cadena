@@ -1,20 +1,12 @@
 import watch
-from watch.builtins import InstanceOf, Predicate, Container
 
 
 from cadena.abc import WatchABCType, DAGNode
 
 
 from .proto import GenericNode, CommitData, TreeData, BlobData, LinkMeta
-# pls dont remove next line
 from .proto import NAMESPACE, DATA
-
-
-SpanChecker = (
-    Container(items=InstanceOf(int), container=tuple) &
-    Predicate(lambda container: len(container) == 2) &
-    Predicate(lambda container: container[1] >= container[0])
-)
+from .links import NamedLink, UnnamedLink, ChunkEndpoint, NamespaceEndpoint
 
 
 def dump_to_dagnode(packed_node) -> DAGNode:
@@ -62,40 +54,6 @@ class _PBPackedNode(WatchABCType):
         )
 
 
-class LinkDescriptor(watch.WatchMe):
-    endpoint = watch.builtins.InstanceOf(bytes)
-
-    def dump_to_pb_link_meta(self):
-        pass
-
-    def __init__(self, endpoint):
-        self.endpoint = endpoint
-
-
-class NSLink(LinkDescriptor):
-    name = watch.builtins.InstanceOf(str)
-
-    def dump_to_pb_link_meta(self):
-        return LinkMeta(type=NAMESPACE, name=self.name)
-
-    def __init__(self, endpoint, name):
-        self.name = name
-        self.endpoint = endpoint
-
-
-class DataLink(LinkDescriptor):
-    span = SpanChecker()
-
-    def dump_to_pb_link_meta(self):
-        return LinkMeta(
-            type=DATA, span_from=self.span[0], span_to=self.span[1]
-        )
-
-    def __init__(self, endpoint, span):
-        self.span = span
-        self.endpoint = endpoint
-
-
 class Commit(_PBPackedNode):
     packed_payload = watch.builtins.InstanceOf(CommitData)
 
@@ -132,23 +90,22 @@ class Tree(_PBPackedNode):
         return self.packed_payload.type
 
     @classmethod
-    def from_description(cls, tree_type, link_descriptors: list):
-
-        # sanity check block
-        if tree_type == DATA:
-            if not all(isinstance(link, DataLink) for link in link_descriptors):
-                raise ValueError()
+    def from_links_description(cls, link_descriptors: list):
+        if all(isinstance(link, NamedLink) for link in link_descriptors):
+            tree_type = NAMESPACE
+        else:
+            tree_type = DATA
 
         return cls(
             packed_payload=TreeData(
                 type=tree_type,
                 mdata=[
-                    descriptor.dump_to_pb_link_meta() for descriptor in
-                    link_descriptors
+                    link_descriptor.dump()
+                    for link_descriptor in link_descriptors
                 ]
             ),
             links=[
-                descriptor.endpoint for descriptor in link_descriptors
+                descriptor.endpoint.id for descriptor in link_descriptors
             ]
         )
 

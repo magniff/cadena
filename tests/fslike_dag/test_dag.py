@@ -2,16 +2,19 @@ import py.test
 
 
 from cadena.fslike_dag import (
-    Blob, BlobData, Commit, CommitData, Tree, TreeData, NSLink, DataLink,
-    dump_to_dagnode, load_from_dagnode, DATA, NAMESPACE, LinkMeta
+    Blob, BlobData, Commit, CommitData, Tree, TreeData, NamedLink, UnnamedLink,
+    dump_to_dagnode, load_from_dagnode, DATA, NAMESPACE, LinkMeta,
+    ChunkEndpoint, NamespaceEndpoint
 )
 
 
 NODES = [
+    # simple blob node
     (
         Blob(packed_payload=BlobData(data=b"helloworld"), links=[]),
         Blob.from_data(data=b"helloworld"),
     ),
+    # data Tree
     (
         Tree(
             packed_payload=TreeData(
@@ -23,30 +26,37 @@ NODES = [
             ),
             links=[b"hex0", b"hex1"]
         ),
-        Tree.from_description(
-            tree_type=DATA,
+        Tree.from_links_description(
             link_descriptors=[
-                DataLink(endpoint=b"hex0", span=(0, 10)),
-                DataLink(endpoint=b"hex1", span=(10, 20)),
+                UnnamedLink(
+                    endpoint=ChunkEndpoint(id=b"hex0", span=(0, 10))
+                ),
+                UnnamedLink(
+                    endpoint=ChunkEndpoint(id=b"hex1", span=(10, 20))
+                )
             ]
         )
     ),
+    # namespace Tree pointing to other namespaces
     (
         Tree(
             packed_payload=TreeData(
                 type=NAMESPACE,
                 mdata=[
-                    LinkMeta(type=DATA, span_from=0, span_to=10),
+                    LinkMeta(type=NAMESPACE, name="helloworld"),
                     LinkMeta(type=NAMESPACE, name="morestuff"),
                 ]
             ),
             links=[b"hex0", b"hex1"]
         ),
-        Tree.from_description(
-            tree_type=NAMESPACE,
+        Tree.from_links_description(
             link_descriptors=[
-                DataLink(endpoint=b"hex0", span=(0, 10)),
-                NSLink(name="morestuff", endpoint=b"hex1"),
+                NamedLink(
+                    name="helloworld", endpoint=NamespaceEndpoint(id=b"hex0")
+                ),
+                NamedLink(
+                    name="morestuff", endpoint=NamespaceEndpoint(id=b"hex1")
+                ),
             ]
         )
     ),
