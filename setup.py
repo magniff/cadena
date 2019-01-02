@@ -1,4 +1,8 @@
+import time
 import setuptools
+
+
+BUILD_NUMBER = str(int(time.time()))
 
 
 classifiers = [
@@ -12,7 +16,7 @@ classifiers = [
 setuptools.setup(
     name="cadena",
     description="Wierd and inefficient Tar clone.",
-    version="0.0.1",
+    version="0.0.1.%s" % BUILD_NUMBER,
     license="MIT license",
     platforms=["unix", "linux", "osx", "win32"],
     author="magniff",
