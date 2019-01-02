@@ -2,54 +2,60 @@ import py.test
 
 
 from cadena.fslike_dag import (
-    Blob, BlobData, Commit, CommitData, Tree, TreeData, LinkDescriptor,
-    dump_to_dagnode, load_from_dagnode, DATA, NAMESPACE, LinkMeta
+    Blob, BlobData, Commit, CommitData, Tree, TreeData, NamedLink, UnnamedLink,
+    dump_to_dagnode, load_from_dagnode, DATA, NAMESPACE, LinkMeta,
+    ChunkEndpoint, NamespaceEndpoint
 )
 
 
 NODES = [
+    # simple blob node
     (
         Blob(packed_payload=BlobData(data=b"helloworld"), links=[]),
         Blob.from_data(data=b"helloworld"),
     ),
+    # data Tree
     (
         Tree(
             packed_payload=TreeData(
                 type=DATA,
                 mdata=[
-                    LinkMeta(type=DATA, name=None),
-                    LinkMeta(type=DATA, name=None),
+                    LinkMeta(type=DATA, name=None, span_from=0, span_to=10),
+                    LinkMeta(type=DATA, name=None, span_from=10, span_to=20),
                 ]
             ),
             links=[b"hex0", b"hex1"]
         ),
-        Tree.from_description(
-            tree_type=DATA,
+        Tree.from_links_description(
             link_descriptors=[
-                LinkDescriptor(endpoint=b"hex0", link_type=DATA),
-                LinkDescriptor(endpoint=b"hex1", link_type=DATA),
+                UnnamedLink(
+                    endpoint=ChunkEndpoint(id=b"hex0", span=(0, 10))
+                ),
+                UnnamedLink(
+                    endpoint=ChunkEndpoint(id=b"hex1", span=(10, 20))
+                )
             ]
         )
     ),
+    # namespace Tree pointing to other namespaces
     (
         Tree(
             packed_payload=TreeData(
                 type=NAMESPACE,
                 mdata=[
-                    LinkMeta(type=DATA, name="helloworld"),
+                    LinkMeta(type=NAMESPACE, name="helloworld"),
                     LinkMeta(type=NAMESPACE, name="morestuff"),
                 ]
             ),
             links=[b"hex0", b"hex1"]
         ),
-        Tree.from_description(
-            tree_type=NAMESPACE,
+        Tree.from_links_description(
             link_descriptors=[
-                LinkDescriptor(
-                    name="helloworld", endpoint=b"hex0", link_type=DATA
+                NamedLink(
+                    name="helloworld", endpoint=NamespaceEndpoint(id=b"hex0")
                 ),
-                LinkDescriptor(
-                    name="morestuff", endpoint=b"hex1", link_type=NAMESPACE
+                NamedLink(
+                    name="morestuff", endpoint=NamespaceEndpoint(id=b"hex1")
                 ),
             ]
         )

@@ -25,6 +25,7 @@ def dump_node_stats(node):
             {
                 "id": link.hex(),
                 "name": link_meta.name,
+                "span": (link_meta.span_from, link_meta.span_to),
                 "type": "NAMESPACE" if link_meta.type == NAMESPACE else "DATA"
             }
             for link_meta, link in zip(node.packed_payload.mdata, node.links)

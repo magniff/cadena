@@ -30,6 +30,8 @@ message Commit {
 message TreeLinkMetadata {
   NodeType type = 1;
   string name = 2;
+  int64 span_from = 3;
+  int64 span_to = 4;
 }
 
 

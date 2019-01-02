@@ -5,8 +5,8 @@ from cadena.abc import WatchABCType, DAGNode
 
 
 from .proto import GenericNode, CommitData, TreeData, BlobData, LinkMeta
-# pls dont remove next line
 from .proto import NAMESPACE, DATA
+from .links import NamedLink, UnnamedLink, ChunkEndpoint, NamespaceEndpoint
 
 
 def dump_to_dagnode(packed_node) -> DAGNode:
@@ -54,17 +54,6 @@ class _PBPackedNode(WatchABCType):
         )
 
 
-class LinkDescriptor(watch.WatchMe):
-    name = watch.builtins.InstanceOf(str) | watch.builtins.Just(None)
-    endpoint = watch.builtins.InstanceOf(bytes)
-    link_type = watch.builtins.Just(DATA, NAMESPACE)
-
-    def __init__(self, endpoint, link_type, name=None):
-        self.link_type = link_type
-        self.name = name
-        self.endpoint = endpoint
-
-
 class Commit(_PBPackedNode):
     packed_payload = watch.builtins.InstanceOf(CommitData)
 
@@ -101,32 +90,23 @@ class Tree(_PBPackedNode):
         return self.packed_payload.type
 
     @classmethod
-    def from_description(cls, tree_type, link_descriptors: list):
-        # sanity check block
-        if tree_type == DATA:
-            all_fine = all(
-                descriptor.name is None and descriptor.link_type == DATA
-                for descriptor in link_descriptors
-            )
-        elif tree_type == NAMESPACE:
-            all_fine = all(
-                descriptor.name is not None for descriptor in link_descriptors
-            )
+    def from_links_description(cls, link_descriptors: list):
+        if all(isinstance(link, NamedLink) for link in link_descriptors):
+            tree_type = NAMESPACE
         else:
-            all_fine = False
-
-        if not all_fine:
-            raise ValueError("Misconfigured Tree node")
+            tree_type = DATA
 
         return cls(
             packed_payload=TreeData(
                 type=tree_type,
                 mdata=[
-                    LinkMeta(type=descriptor.link_type, name=descriptor.name)
-                    for descriptor in link_descriptors
+                    link_descriptor.dump()
+                    for link_descriptor in link_descriptors
                 ]
             ),
-            links=[descriptor.endpoint for descriptor in link_descriptors]
+            links=[
+                descriptor.endpoint.id for descriptor in link_descriptors
+            ]
         )
 
 
