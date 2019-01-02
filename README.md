@@ -2,6 +2,7 @@
 
 [![Build Status](https://api.travis-ci.org/magniff/cadena.svg?branch=develop)](https://travis-ci.org/magniff/cadena)
 [![codecov](https://codecov.io/gh/magniff/cadena/branch/develop/graph/badge.svg)](https://codecov.io/gh/magniff/cadena)
+----
 [![PyPI version](https://badge.fury.io/py/cadena.png)](https://badge.fury.io/py/cadena)
 
 ```bash
