@@ -21,7 +21,7 @@ NamespaceStorageResult = collections.namedtuple("NamespaceStorageResult", "id")
 
 
 # global chunk size value in KiB
-CHUNK_SIZE = 1000
+CHUNK_SIZE = None
 
 
 def endpoint_from_store_result(result):
@@ -123,12 +123,12 @@ def store_path(path, driver, session):
 @click.command()
 @click.argument("path_to_store", type=click.Path(exists=True))
 @click.option(
-    "-s", "--chunk_size", type=int,
-    required=False, default=CHUNK_SIZE * 1024
+    "-s", "--chunk_size", type=int, required=False, default=1000
 )
 def cli(path_to_store, chunk_size):
     global CHUNK_SIZE
     CHUNK_SIZE = chunk_size * 1024
+
     driver = new_sqlite_driver_from_path("snapshot.db")
     path = pathlib.Path(path_to_store)
 
