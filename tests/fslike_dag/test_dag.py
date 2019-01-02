@@ -2,7 +2,7 @@ import py.test
 
 
 from cadena.fslike_dag import (
-    Blob, BlobData, Commit, CommitData, Tree, TreeData, LinkDescriptor,
+    Blob, BlobData, Commit, CommitData, Tree, TreeData, NSLink, DataLink,
     dump_to_dagnode, load_from_dagnode, DATA, NAMESPACE, LinkMeta
 )
 
@@ -17,8 +17,8 @@ NODES = [
             packed_payload=TreeData(
                 type=DATA,
                 mdata=[
-                    LinkMeta(type=DATA, name=None),
-                    LinkMeta(type=DATA, name=None),
+                    LinkMeta(type=DATA, name=None, span_from=0, span_to=10),
+                    LinkMeta(type=DATA, name=None, span_from=10, span_to=20),
                 ]
             ),
             links=[b"hex0", b"hex1"]
@@ -26,8 +26,8 @@ NODES = [
         Tree.from_description(
             tree_type=DATA,
             link_descriptors=[
-                LinkDescriptor(endpoint=b"hex0", link_type=DATA),
-                LinkDescriptor(endpoint=b"hex1", link_type=DATA),
+                DataLink(endpoint=b"hex0", span=(0, 10)),
+                DataLink(endpoint=b"hex1", span=(10, 20)),
             ]
         )
     ),
@@ -36,7 +36,7 @@ NODES = [
             packed_payload=TreeData(
                 type=NAMESPACE,
                 mdata=[
-                    LinkMeta(type=DATA, name="helloworld"),
+                    LinkMeta(type=DATA, span_from=0, span_to=10),
                     LinkMeta(type=NAMESPACE, name="morestuff"),
                 ]
             ),
@@ -45,12 +45,8 @@ NODES = [
         Tree.from_description(
             tree_type=NAMESPACE,
             link_descriptors=[
-                LinkDescriptor(
-                    name="helloworld", endpoint=b"hex0", link_type=DATA
-                ),
-                LinkDescriptor(
-                    name="morestuff", endpoint=b"hex1", link_type=NAMESPACE
-                ),
+                DataLink(endpoint=b"hex0", span=(0, 10)),
+                NSLink(name="morestuff", endpoint=b"hex1"),
             ]
         )
     ),

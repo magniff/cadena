@@ -1,4 +1,5 @@
 import watch
+from watch.builtins import InstanceOf, Predicate, Container
 
 
 from cadena.abc import WatchABCType, DAGNode
@@ -7,6 +8,13 @@ from cadena.abc import WatchABCType, DAGNode
 from .proto import GenericNode, CommitData, TreeData, BlobData, LinkMeta
 # pls dont remove next line
 from .proto import NAMESPACE, DATA
+
+
+SpanChecker = (
+    Container(items=InstanceOf(int), container=tuple) &
+    Predicate(lambda container: len(container) == 2) &
+    Predicate(lambda container: container[1] >= container[0])
+)
 
 
 def dump_to_dagnode(packed_node) -> DAGNode:
@@ -55,13 +63,36 @@ class _PBPackedNode(WatchABCType):
 
 
 class LinkDescriptor(watch.WatchMe):
-    name = watch.builtins.InstanceOf(str) | watch.builtins.Just(None)
     endpoint = watch.builtins.InstanceOf(bytes)
-    link_type = watch.builtins.Just(DATA, NAMESPACE)
 
-    def __init__(self, endpoint, link_type, name=None):
-        self.link_type = link_type
+    def dump_to_pb_link_meta(self):
+        pass
+
+    def __init__(self, endpoint):
+        self.endpoint = endpoint
+
+
+class NSLink(LinkDescriptor):
+    name = watch.builtins.InstanceOf(str)
+
+    def dump_to_pb_link_meta(self):
+        return LinkMeta(type=NAMESPACE, name=self.name)
+
+    def __init__(self, endpoint, name):
         self.name = name
+        self.endpoint = endpoint
+
+
+class DataLink(LinkDescriptor):
+    span = SpanChecker()
+
+    def dump_to_pb_link_meta(self):
+        return LinkMeta(
+            type=DATA, span_from=self.span[0], span_to=self.span[1]
+        )
+
+    def __init__(self, endpoint, span):
+        self.span = span
         self.endpoint = endpoint
 
 
@@ -102,31 +133,23 @@ class Tree(_PBPackedNode):
 
     @classmethod
     def from_description(cls, tree_type, link_descriptors: list):
+
         # sanity check block
         if tree_type == DATA:
-            all_fine = all(
-                descriptor.name is None and descriptor.link_type == DATA
-                for descriptor in link_descriptors
-            )
-        elif tree_type == NAMESPACE:
-            all_fine = all(
-                descriptor.name is not None for descriptor in link_descriptors
-            )
-        else:
-            all_fine = False
-
-        if not all_fine:
-            raise ValueError("Misconfigured Tree node")
+            if not all(isinstance(link, DataLink) for link in link_descriptors):
+                raise ValueError()
 
         return cls(
             packed_payload=TreeData(
                 type=tree_type,
                 mdata=[
-                    LinkMeta(type=descriptor.link_type, name=descriptor.name)
-                    for descriptor in link_descriptors
+                    descriptor.dump_to_pb_link_meta() for descriptor in
+                    link_descriptors
                 ]
             ),
-            links=[descriptor.endpoint for descriptor in link_descriptors]
+            links=[
+                descriptor.endpoint for descriptor in link_descriptors
+            ]
         )
 
 
