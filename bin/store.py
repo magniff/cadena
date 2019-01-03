@@ -91,7 +91,7 @@ def store_file(path, driver, session, self_namespace=False):
 
     if not self_namespace:
         result_to_return = ChunkStorageResult(
-            id=data_tree_id, right=right, left=left
+            id=data_tree_id, right=right, left=0
         )
     else:
         result_to_return = NamespaceStorageResult(
