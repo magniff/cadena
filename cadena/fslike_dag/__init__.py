@@ -1,7 +1,7 @@
 import watch
 
 
-from cadena.abc import WatchABCType, DAGNode
+from cadena.drivers.abc import WatchABCType, DAGNode
 
 
 from .proto import GenericNode, CommitData, TreeData, BlobData, LinkMeta

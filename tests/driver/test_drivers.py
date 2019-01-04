@@ -14,7 +14,7 @@ import cadena.drivers.alchemy as alchemy
 import cadena.drivers.mongo as mongo
 
 
-from cadena.abc import DAGNode
+from cadena.drivers.abc import DAGNode
 
 
 Nodes = s.deferred(lambda: s.tuples(s.binary(min_size=0, max_size=10), Links))

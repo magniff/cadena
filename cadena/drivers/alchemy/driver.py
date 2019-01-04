@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 
-from cadena.abc import AbstractDriver, DAGNode
+from cadena.drivers.abc import AbstractDriver, DAGNode
 from cadena.drivers.common import sha256_id
 
 

@@ -1,7 +1,7 @@
 import pymongo
 
 
-from cadena.abc import AbstractDriver, DAGNode
+from cadena.drivers.abc import AbstractDriver, DAGNode
 from cadena.drivers.common import sha256_id
 
 
